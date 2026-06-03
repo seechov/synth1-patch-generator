@@ -39,6 +39,7 @@ struct CategoricalEncoding {
 struct NormParams {
     latent_dim: usize,
     output_dim: usize,
+    #[allow(dead_code)]
     column_names: Vec<String>,
     continuous_stats: HashMap<String, ContinuousStat>,
     categorical_encodings: HashMap<String, CategoricalEncoding>,
@@ -55,12 +56,12 @@ type TracModel = SimplePlan<
 fn load_onnx(path: &Path, latent_dim: usize) -> TractResult<TracModel> {
     tract_onnx::onnx()
         .model_for_path(path)?
-        .with_input_fact(0, f32::fact([1usize, latent_dim]))?
+        .with_input_fact(0, f32::fact([1usize, latent_dim]).into())?
         .into_optimized()?
         .into_runnable()
 }
 
-fn generate_one(model: &TracModel, latent_dim: usize, output_dim: usize) -> Vec<f32> {
+fn generate_one(model: &TracModel, latent_dim: usize, _output_dim: usize) -> Vec<f32> {
     let normal = Normal::new(0.0f32, 1.0f32).unwrap();
     let mut rng = thread_rng();
     let noise: Vec<f32> = (0..latent_dim).map(|_| normal.sample(&mut rng)).collect();
@@ -207,10 +208,10 @@ impl App {
     }
 
     fn generate(&mut self) {
-        let (Some(model), Some(params)) = (self.model.as_ref(), self.norm_params.as_ref()) else {
+        if self.model.is_none() || self.norm_params.is_none() {
             self.log("✗ Load a model first.");
             return;
-        };
+        }
         if self.output_dir.is_empty() {
             self.log("✗ Choose an output folder first.");
             return;
@@ -222,35 +223,43 @@ impl App {
             return;
         }
 
-        self.log(format!("Generating {} presets…", self.num_presets));
-
+        let num_presets = self.num_presets;
+        let bank = self.bank_name.clone();
+        let mut new_logs: Vec<String> = Vec::new();
         let mut ok = 0u32;
         let mut err = 0u32;
-        let latent_dim = params.latent_dim;
-        let output_dim = params.output_dim;
-        let bank = self.bank_name.clone();
 
-        for i in 0..self.num_presets {
-            let output = generate_one(model, latent_dim, output_dim);
-            let preset_params = decode_preset(&output, params);
-            let preset_name = format!("{}-{:03}", bank, i + 1);
-            let file_path = out_dir.join(format!("{:03}.sy1", i + 1));
+        {
+            let model = self.model.as_ref().unwrap();
+            let params = self.norm_params.as_ref().unwrap();
+            let latent_dim = params.latent_dim;
+            let output_dim = params.output_dim;
 
-            match write_sy1(&file_path, &preset_name, &preset_params) {
-                Ok(_) => ok += 1,
-                Err(e) => {
-                    self.log(format!("  ✗ {:03}.sy1: {}", i + 1, e));
-                    err += 1;
+            new_logs.push(format!("Generating {} presets…", num_presets));
+
+            for i in 0..num_presets {
+                let output = generate_one(model, latent_dim, output_dim);
+                let preset_params = decode_preset(&output, params);
+                let preset_name = format!("{}-{:03}", bank, i + 1);
+                let file_path = out_dir.join(format!("{:03}.sy1", i + 1));
+
+                match write_sy1(&file_path, &preset_name, &preset_params) {
+                    Ok(_) => ok += 1,
+                    Err(e) => {
+                        new_logs.push(format!("  ✗ {:03}.sy1: {}", i + 1, e));
+                        err += 1;
+                    }
                 }
             }
         }
 
-        self.log(format!(
+        new_logs.push(format!(
             "✓ Done: {} presets written to {}  ({} errors)",
             ok,
             out_dir.display(),
             err
         ));
+        self.log.extend(new_logs);
     }
 
     fn model_loaded(&self) -> bool {
@@ -385,6 +394,6 @@ fn main() -> eframe::Result<()> {
     eframe::run_native(
         "Synth1GAN",
         options,
-        Box::new(|cc| Box::new(App::new(cc))),
+        Box::new(|cc| Ok(Box::new(App::new(cc)))),
     )
 }
