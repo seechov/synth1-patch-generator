@@ -1,0 +1,32 @@
+{
+  "name": "Synth1GAN",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": "..",
+  },
+  "workspaceFolder": "/workspaces/Synth1GAN",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspaces/Synth1GAN,type=bind,consistency=cached",
+
+  // "mounts": [
+  //   "source=${localWorkspaceFolder},target=/workspaces/Synth1GAN,type=bind,consistency=cached"
+  // ],
+  "postCreateCommand": "rustup component add rust-analyzer rust-src clippy rustfmt",
+  "remoteUser": "root",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "rust-lang.rust-analyzer",
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "tamasfe.even-better-toml",
+      ],
+      "settings": {
+        "rust-analyzer.cargo.buildScripts.enable": true,
+        "python.defaultInterpreterPath": "/usr/local/bin/python3",
+      },
+    },
+    "zed": {
+      "extensions": ["rust", "python", "toml"],
+    },
+  },
+}

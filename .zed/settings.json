@@ -1,0 +1,39 @@
+{
+  "languages": {
+    "Rust": {
+      "format_on_save": "on",
+      "formatter": "language_server",
+      "tab_size": 4
+    },
+    "Python": {
+      "format_on_save": "on",
+      "tab_size": 4
+    }
+  },
+  "lsp": {
+    "rust-analyzer": {
+      "initialization_options": {
+        "cargo": {
+          "buildScripts": { "enable": true }
+        },
+        "checkOnSave": { "command": "clippy" },
+        "procMacro": { "enable": true }
+      }
+    },
+    "pyright": {
+      "settings": {
+        "python": {
+          "pythonPath": "/usr/local/bin/python3"
+        }
+      }
+    }
+  },
+  "file_scan_exclusions": [
+    "**/.git",
+    "**/target",
+    "**/__pycache__",
+    "**/.venv",
+    "**/*.onnx",
+    "**/checkpoints"
+  ]
+}

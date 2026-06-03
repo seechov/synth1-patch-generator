@@ -1,0 +1,23 @@
+# Jupyter
+.ipynb_checkpoints/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+*.egg-info/
+
+# Training output — model files are large; commit them separately if needed
+model/
+checkpoints/
+wgangp_final/
+
+# Rust
+gui/target/
+
+# Generated preset outputs
+gp_batch_final_*/
+
+# OS
+.DS_Store
+Thumbs.db
