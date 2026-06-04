@@ -18,8 +18,6 @@ Synth1GAN/
 └── .zed/              # Zed editor settings
 ```
 
-The original Jupyter notebooks (`create_csv.ipynb`, `feature_engineering.ipynb`, `synth_gan_gp.ipynb`) are still in the root for reference.
-
 ---
 
 ## Step 1 — Train the model (Windows, native)

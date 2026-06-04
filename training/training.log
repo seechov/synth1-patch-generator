@@ -1,0 +1,54 @@
+/usr/local/lib/python3.11/site-packages/torch/utils/data/dataloader.py:752: UserWarning: 'pin_memory' argument is set as true but no accelerator is found, then device pinned memory won't be used.
+  super().__init__(loader)
+
+=== Synth1GAN Training ===
+
+Step 1/5 — Loading presets
+Scanning ../presets for .sy1 files...
+  Found 15882 .sy1 files
+  Successfully parsed 15882 presets
+
+Step 2/5 — Building dataset
+
+Step 3/5 — Feature engineering
+  Categorical columns: ['osc1 shape', 'osc2 shape', 'osc mod env dest.', 'filter type', 'chorus type', 'play mode type', 'lfo1 destination', 'lfo1 type', 'lfo2 destination', 'lfo2 type']
+  Total features after encoding: 105
+  Dataset shape: (15588, 105)
+
+Step 4/5 — Training WGAN-GP
+  Device: cpu
+  Data size: 105 features, 15588 presets
+
+Starting training: 1000 epochs, batch=64, latent_dim=10
+──────────────────────────────────────────────────────────────────────
+[Epoch     0/1000] [Batch    0/243] [D: +9.3335] [G: -0.1242]
+[Epoch     0/1000] [Batch   80/243] [D: -4.9192] [G: -1.5292]
+[Epoch     0/1000] [Batch  160/243] [D: -1.9377] [G: -2.3005]
+[Epoch     0/1000] [Batch  240/243] [D: -1.7310] [G: -2.1964]
+[Epoch     5/1000] [Batch   65/243] [D: -3.8636] [G: +1.1875]
+[Epoch     5/1000] [Batch  145/243] [D: -3.3328] [G: +1.2320]
+[Epoch     5/1000] [Batch  225/243] [D: -3.5735] [G: +1.2144]
+[Epoch    10/1000] [Batch   50/243] [D: -3.0970] [G: +1.3400]
+[Epoch    10/1000] [Batch  130/243] [D: -3.2619] [G: +1.4935]
+[Epoch    10/1000] [Batch  210/243] [D: -3.1965] [G: +1.7930]
+[Epoch    15/1000] [Batch   35/243] [D: -2.8256] [G: +1.9564]
+[Epoch    15/1000] [Batch  115/243] [D: -2.9558] [G: +1.9735]
+Traceback (most recent call last):
+  File "/workspaces/Synth1GAN/training/train.py", line 603, in <module>
+    main()
+  File "/workspaces/Synth1GAN/training/train.py", line 572, in main
+    generator = train(
+                ^^^^^^
+  File "/workspaces/Synth1GAN/training/train.py", line 401, in train
+    gp = compute_gradient_penalty(discriminator, real_imgs, fake_imgs, device)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspaces/Synth1GAN/training/train.py", line 332, in compute_gradient_penalty
+    grads = autograd.grad(
+            ^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/torch/autograd/__init__.py", line 530, in grad
+    result = _engine_run_backward(
+             ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/torch/autograd/graph.py", line 882, in _engine_run_backward
+    return Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+KeyboardInterrupt
