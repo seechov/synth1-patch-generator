@@ -209,17 +209,23 @@ def engineer_features(
     Returns (df, cat_vars, encoders, one_hot_cols) where one_hot_cols is the set
     of generated one-hot column names (e.g. "filter type-0").
     """
+    n_rows0, n_cols0 = df.shape
+
     # Drop metadata and non-useful synthesis columns
     drop_existing = [c for c in TO_DROP if c in df.columns]
     df = df.drop(columns=drop_existing)
     for meta in ["color", "ver", "pack"]:
         if meta in df.columns:
             df = df.drop(columns=[meta])
+    n_cols_after_drop = df.shape[1]
 
     # Convert everything to numeric
     for col in df.columns:
         df[col] = pd.to_numeric(df[col], errors="coerce")
+    # Drop columns where ≥20% of values are missing, then median-fill the rest.
+    before_dropna_cols = df.shape[1]
     df = df.dropna(axis=1, thresh=int(len(df) * 0.8))
+    dropped_sparse_cols = before_dropna_cols - df.shape[1]
     df = df.fillna(df.median(numeric_only=True))
 
     # One-hot encode known categorical variables
@@ -253,8 +259,16 @@ def engineer_features(
 
     if new_cols:
         df = pd.concat([df] + new_cols, axis=1)
+    n_rows_before_dedup = df.shape[0]
     df = df.drop_duplicates()
+    n_dup_rows = n_rows_before_dedup - df.shape[0]
 
+    print(f"  Input: {n_rows0} presets, {n_cols0} raw columns")
+    print(
+        f"  Dropped {n_cols0 - n_cols_after_drop} metadata/noise columns; "
+        f"{dropped_sparse_cols} sparse columns (<80% present)"
+    )
+    print(f"  Removed {n_dup_rows} duplicate rows")
     print(f"  Categorical columns: {list(cat_vars.keys())}")
     print(f"  Total features after encoding: {df.shape[1]}")
     return df, cat_vars, encoders, one_hot_cols
@@ -470,6 +484,10 @@ def train(
         pin_memory=(device.type == "cuda"),
     )
 
+    # Full real-data tensor (CPU) used for the on-the-fly diversity metric. Kept
+    # on CPU to avoid competing with training memory; distances are small.
+    real_all = torch.as_tensor(dataset.data, dtype=torch.float32)
+
     generator = Generator(latent_dim, n_cont, group_sizes, batch_norm).to(device)
     discriminator = Discriminator(data_size, spectral_norm).to(device)
 
@@ -528,11 +546,31 @@ def train(
                 opt_G.step()
 
                 if batches_done % sample_interval == 0:
+                    with torch.no_grad():
+                        # Diversity diagnostics (cheap, CPU): mean minimal L2
+                        # distance from generated samples to the nearest real
+                        # preset, and pairwise spread among generated samples.
+                        # Very low values signal mode collapse.
+                        f = fake_imgs.detach().cpu()
+                        nn_dist = (
+                            (f[:, None, :] - real_all[None, :, :])
+                            .pow(2)
+                            .sum(-1)
+                            .sqrt()
+                            .min(dim=1)
+                            .values.mean()
+                            .item()
+                        )
+                        pw = (
+                            (f[:, None, :] - f[None, :, :]).pow(2).sum(-1).sqrt().sum()
+                            / (f.size(0) ** 2 - f.size(0))
+                        ).item()
                     print(
                         f"[Epoch {epoch:>5}/{n_epochs}] "
                         f"[Batch {i:>4}/{len(dataloader)}] "
                         f"[D: {d_loss.item():+.4f}] "
-                        f"[G: {g_loss.item():+.4f}]"
+                        f"[G: {g_loss.item():+.4f}] "
+                        f"[min-nn: {nn_dist:.3f} pw: {pw:.3f}]"
                     )
                     sys.stdout.flush()
 
