@@ -163,7 +163,7 @@ jobs:
         with:
           generate_release_notes: true
           files: |
-            artifacts/windows-installer/*.exe
-            artifacts/linux-packages/*.deb
-            artifacts/linux-packages/*.rpm
-            artifacts/macos-dmg/*.dmg
+            artifacts/windows-installer/**/*.exe
+            artifacts/linux-packages/**/*.deb
+            artifacts/linux-packages/**/*.rpm
+            artifacts/macos-dmg/**/*.dmg
