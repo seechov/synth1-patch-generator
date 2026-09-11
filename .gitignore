@@ -11,6 +11,7 @@ __pycache__/
 model/
 checkpoints/
 wgangp_final/
+presets/
 
 # Rust
 gui/target/

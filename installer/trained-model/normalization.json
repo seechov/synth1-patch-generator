@@ -1,0 +1,545 @@
+{
+  "latent_dim": 10,
+  "output_dim": 105,
+  "column_names": [
+    "osc2 tune",
+    "osc mix",
+    "osc sync",
+    "osc ring modulation",
+    "osc pulse width",
+    "osc mod env on/off",
+    "osc mod env amount",
+    "osc mod env attack",
+    "osc p.env decay",
+    "osc1,2 tune",
+    "filter attack",
+    "filter decay",
+    "filter sustain",
+    "filter release",
+    "filter freq",
+    "filter resonance",
+    "filter amount",
+    "filter kbd track",
+    "filter distortion",
+    "filter velocity switch",
+    "amp attack",
+    "amp decay",
+    "amp sustain",
+    "amp release",
+    "amp gain",
+    "amp velocity sens.",
+    "delay on/off",
+    "delay time",
+    "delay feedback",
+    "delay level",
+    "chorus on/off",
+    "chorus delay time",
+    "chorus depth",
+    "chorus rate",
+    "chorus feedback",
+    "chorus level",
+    "play mode portament",
+    "portament auto mode",
+    "unison mode",
+    "wheel lfo1 depth sens.",
+    "wheel lfo1 speed sens.",
+    "lfo1 on/off",
+    "lfo1 speed",
+    "lfo1 depth",
+    "lfo1 tempo sync",
+    "lfo1 key sync",
+    "lfo2 on/off",
+    "lfo2 speed",
+    "lfo2 depth",
+    "lfo2 tempo sync",
+    "lfo2 key sync",
+    "osc1 shape-0",
+    "osc1 shape-1",
+    "osc1 shape-2",
+    "osc1 shape-3",
+    "osc2 shape-0",
+    "osc2 shape-1",
+    "osc2 shape-2",
+    "osc2 shape-3",
+    "osc mod env dest.-0",
+    "osc mod env dest.-1",
+    "osc mod env dest.-2",
+    "osc mod env dest.-3",
+    "filter type-0",
+    "filter type-1",
+    "filter type-2",
+    "filter type-3",
+    "filter type-4",
+    "filter type-5",
+    "chorus type-0",
+    "chorus type-1",
+    "chorus type-2",
+    "chorus type-3",
+    "chorus type-4",
+    "play mode type-0",
+    "play mode type-1",
+    "play mode type-2",
+    "lfo1 destination-0",
+    "lfo1 destination-1",
+    "lfo1 destination-2",
+    "lfo1 destination-3",
+    "lfo1 destination-4",
+    "lfo1 destination-5",
+    "lfo1 destination-6",
+    "lfo1 destination-7",
+    "lfo1 type-0",
+    "lfo1 type-1",
+    "lfo1 type-2",
+    "lfo1 type-3",
+    "lfo1 type-4",
+    "lfo1 type-5",
+    "lfo2 destination-0",
+    "lfo2 destination-1",
+    "lfo2 destination-2",
+    "lfo2 destination-3",
+    "lfo2 destination-4",
+    "lfo2 destination-5",
+    "lfo2 destination-6",
+    "lfo2 destination-7",
+    "lfo2 type-0",
+    "lfo2 type-1",
+    "lfo2 type-2",
+    "lfo2 type-3",
+    "lfo2 type-4",
+    "lfo2 type-5"
+  ],
+  "continuous_stats": {
+    "osc2 tune": {
+      "col_idx": 0,
+      "min": 0.0,
+      "max": 127.0,
+      "param_id": "3"
+    },
+    "osc mix": {
+      "col_idx": 1,
+      "min": 0.0,
+      "max": 127.0,
+      "param_id": "5"
+    },
+    "osc sync": {
+      "col_idx": 2,
+      "min": 0.0,
+      "max": 1.0,
+      "param_id": "6"
+    },
+    "osc ring modulation": {
+      "col_idx": 3,
+      "min": 0.0,
+      "max": 1.0,
+      "param_id": "7"
+    },
+    "osc pulse width": {
+      "col_idx": 4,
+      "min": 0.0,
+      "max": 127.0,
+      "param_id": "8"
+    },
+    "osc mod env on/off": {
+      "col_idx": 5,
+      "min": 0.0,
+      "max": 1.0,
+      "param_id": "10"
+    },
+    "osc mod env amount": {
+      "col_idx": 6,
+      "min": 0.0,
+      "max": 127.0,
+      "param_id": "11"
+    },
+    "osc mod env attack": {
+      "col_idx": 7,
+      "min": 0.0,
+      "max": 127.0,
+      "param_id": "12"
+    },
+    "osc p.env decay": {
+      "col_idx": 8,
+      "min": 0.0,
+      "max": 127.0,
+      "param_id": "13"
+    },
+    "osc1,2 tune": {
+      "col_idx": 9,
+      "min": 0.0,
+      "max": 127.0,
+      "param_id": "72"
+    },
+    "filter attack": {
+      "col_idx": 10,
+      "min": 0.0,
+      "max": 127.0,
+      "param_id": "15"
+    },
+    "filter decay": {
+      "col_idx": 11,
+      "min": 0.0,
+      "max": 127.0,
+      "param_id": "16"
+    },
+    "filter sustain": {
+      "col_idx": 12,
+      "min": 0.0,
+      "max": 127.0,
+      "param_id": "17"
+    },
+    "filter release": {
+      "col_idx": 13,
+      "min": 0.0,
+      "max": 127.0,
+      "param_id": "18"
+    },
+    "filter freq": {
+      "col_idx": 14,
+      "min": 0.0,
+      "max": 127.0,
+      "param_id": "19"
+    },
+    "filter resonance": {
+      "col_idx": 15,
+      "min": 0.0,
+      "max": 127.0,
+      "param_id": "20"
+    },
+    "filter amount": {
+      "col_idx": 16,
+      "min": 0.0,
+      "max": 128.0,
+      "param_id": "21"
+    },
+    "filter kbd track": {
+      "col_idx": 17,
+      "min": 0.0,
+      "max": 127.0,
+      "param_id": "22"
+    },
+    "filter distortion": {
+      "col_idx": 18,
+      "min": 0.0,
+      "max": 127.0,
+      "param_id": "23"
+    },
+    "filter velocity switch": {
+      "col_idx": 19,
+      "min": 0.0,
+      "max": 1.0,
+      "param_id": "24"
+    },
+    "amp attack": {
+      "col_idx": 20,
+      "min": 0.0,
+      "max": 127.0,
+      "param_id": "25"
+    },
+    "amp decay": {
+      "col_idx": 21,
+      "min": 0.0,
+      "max": 127.0,
+      "param_id": "26"
+    },
+    "amp sustain": {
+      "col_idx": 22,
+      "min": 0.0,
+      "max": 127.0,
+      "param_id": "27"
+    },
+    "amp release": {
+      "col_idx": 23,
+      "min": 0.0,
+      "max": 127.0,
+      "param_id": "28"
+    },
+    "amp gain": {
+      "col_idx": 24,
+      "min": 1.0,
+      "max": 127.0,
+      "param_id": "29"
+    },
+    "amp velocity sens.": {
+      "col_idx": 25,
+      "min": 0.0,
+      "max": 127.0,
+      "param_id": "30"
+    },
+    "delay on/off": {
+      "col_idx": 26,
+      "min": 0.0,
+      "max": 1.0,
+      "param_id": "65"
+    },
+    "delay time": {
+      "col_idx": 27,
+      "min": 0.0,
+      "max": 40.0,
+      "param_id": "35"
+    },
+    "delay feedback": {
+      "col_idx": 28,
+      "min": 0.0,
+      "max": 127.0,
+      "param_id": "36"
+    },
+    "delay level": {
+      "col_idx": 29,
+      "min": 0.0,
+      "max": 127.0,
+      "param_id": "37"
+    },
+    "chorus on/off": {
+      "col_idx": 30,
+      "min": 0.0,
+      "max": 1.0,
+      "param_id": "66"
+    },
+    "chorus delay time": {
+      "col_idx": 31,
+      "min": 0.0,
+      "max": 127.0,
+      "param_id": "52"
+    },
+    "chorus depth": {
+      "col_idx": 32,
+      "min": 0.0,
+      "max": 127.0,
+      "param_id": "53"
+    },
+    "chorus rate": {
+      "col_idx": 33,
+      "min": 0.0,
+      "max": 127.0,
+      "param_id": "54"
+    },
+    "chorus feedback": {
+      "col_idx": 34,
+      "min": 0.0,
+      "max": 127.0,
+      "param_id": "55"
+    },
+    "chorus level": {
+      "col_idx": 35,
+      "min": 0.0,
+      "max": 127.0,
+      "param_id": "56"
+    },
+    "play mode portament": {
+      "col_idx": 36,
+      "min": 0.0,
+      "max": 127.0,
+      "param_id": "39"
+    },
+    "portament auto mode": {
+      "col_idx": 37,
+      "min": 0.0,
+      "max": 1.0,
+      "param_id": "74"
+    },
+    "unison mode": {
+      "col_idx": 38,
+      "min": 0.0,
+      "max": 1.0,
+      "param_id": "73"
+    },
+    "wheel lfo1 depth sens.": {
+      "col_idx": 39,
+      "min": 0.0,
+      "max": 127.0,
+      "param_id": "50"
+    },
+    "wheel lfo1 speed sens.": {
+      "col_idx": 40,
+      "min": 0.0,
+      "max": 127.0,
+      "param_id": "51"
+    },
+    "lfo1 on/off": {
+      "col_idx": 41,
+      "min": 0.0,
+      "max": 1.0,
+      "param_id": "57"
+    },
+    "lfo1 speed": {
+      "col_idx": 42,
+      "min": 0.0,
+      "max": 127.0,
+      "param_id": "43"
+    },
+    "lfo1 depth": {
+      "col_idx": 43,
+      "min": 0.0,
+      "max": 127.0,
+      "param_id": "44"
+    },
+    "lfo1 tempo sync": {
+      "col_idx": 44,
+      "min": 0.0,
+      "max": 1.0,
+      "param_id": "67"
+    },
+    "lfo1 key sync": {
+      "col_idx": 45,
+      "min": 0.0,
+      "max": 1.0,
+      "param_id": "68"
+    },
+    "lfo2 on/off": {
+      "col_idx": 46,
+      "min": 0.0,
+      "max": 1.0,
+      "param_id": "58"
+    },
+    "lfo2 speed": {
+      "col_idx": 47,
+      "min": 0.0,
+      "max": 127.0,
+      "param_id": "48"
+    },
+    "lfo2 depth": {
+      "col_idx": 48,
+      "min": 0.0,
+      "max": 127.0,
+      "param_id": "49"
+    },
+    "lfo2 tempo sync": {
+      "col_idx": 49,
+      "min": 0.0,
+      "max": 1.0,
+      "param_id": "69"
+    },
+    "lfo2 key sync": {
+      "col_idx": 50,
+      "min": 0.0,
+      "max": 1.0,
+      "param_id": "70"
+    }
+  },
+  "categorical_encodings": {
+    "osc1 shape": {
+      "start_idx": 51,
+      "num_classes": 4,
+      "categories": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "param_id": "0"
+    },
+    "osc2 shape": {
+      "start_idx": 55,
+      "num_classes": 4,
+      "categories": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "param_id": "1"
+    },
+    "osc mod env dest.": {
+      "start_idx": 59,
+      "num_classes": 4,
+      "categories": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "param_id": "71"
+    },
+    "filter type": {
+      "start_idx": 63,
+      "num_classes": 6,
+      "categories": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "param_id": "14"
+    },
+    "chorus type": {
+      "start_idx": 69,
+      "num_classes": 5,
+      "categories": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "param_id": "64"
+    },
+    "play mode type": {
+      "start_idx": 74,
+      "num_classes": 3,
+      "categories": [
+        0,
+        1,
+        2
+      ],
+      "param_id": "38"
+    },
+    "lfo1 destination": {
+      "start_idx": 77,
+      "num_classes": 8,
+      "categories": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "param_id": "41"
+    },
+    "lfo1 type": {
+      "start_idx": 85,
+      "num_classes": 6,
+      "categories": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "param_id": "42"
+    },
+    "lfo2 destination": {
+      "start_idx": 91,
+      "num_classes": 8,
+      "categories": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "param_id": "46"
+    },
+    "lfo2 type": {
+      "start_idx": 99,
+      "num_classes": 6,
+      "categories": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "param_id": "47"
+    }
+  }
+}

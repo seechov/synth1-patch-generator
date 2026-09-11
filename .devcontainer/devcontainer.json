@@ -10,7 +10,16 @@
   // "mounts": [
   //   "source=${localWorkspaceFolder},target=/workspaces/Synth1GAN,type=bind,consistency=cached"
   // ],
-  "postCreateCommand": "rustup component add rust-analyzer rust-src clippy rustfmt",
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": { "version": "22" },
+    "ghcr.io/devcontainers/features/rust:1.5.0": {
+        "version": "1.88",
+        "profile": "default",
+        "components": "rust-analyzer,rust-src,rustfmt,clippy"
+    }
+  },
+  "onCreateCommand": "rustup default stable",
+  "postCreateCommand": "npm install -g @deepseek-ai/dsh @openma/deepseek-harness-acp",
   "remoteUser": "root",
   "customizations": {
     "vscode": {
@@ -29,4 +38,7 @@
       "extensions": ["rust", "python", "toml"],
     },
   },
+  "remoteEnv": {
+    "DEEPSEEK_API_KEY": "${localEnv:DEEPSEEK_API_KEY}"
+  }
 }

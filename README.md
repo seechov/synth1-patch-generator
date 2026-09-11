@@ -14,6 +14,8 @@ Synth1GAN/
 ├── gui/               # Rust: cross-platform GUI for generating presets
 │   ├── Cargo.toml
 │   └── src/main.rs
+├── installer/         # Packaging configs (Windows/macOS/Linux)
+│   └── trained-model/ # Bundled default model for the installers
 ├── .devcontainer/     # DevContainer config for Zed / VS Code
 └── .zed/              # Zed editor settings
 ```
@@ -103,12 +105,14 @@ cargo run --release
 
 ## Step 3 — Generate presets
 
-1. Launch the app
-2. Click **…** next to **Model folder** → select the `model/` directory from Step 1
-3. Click **Load model** — you should see a green "● model ready" indicator
-4. Click **…** next to **Output folder** → choose where to save the `.sy1` files
-5. Set a bank name and preset count (1–128)
-6. Click **⚡ Generate**
+The installers bundle a default model (`installer/trained-model/`), so on first launch the GUI auto-discovers it next to the executable and loads it right away. The default output folder is `Documents/Synth1GAN/presets`.
+
+1. Launch the app — you should see a green "● model ready" indicator (bundled model auto-loaded)
+2. Pick a **Output folder** (defaults to `Documents/Synth1GAN/presets`)
+3. Set a bank name and preset count (1–128)
+4. Click **⚡ Generate**
+
+If you trained your own model, point **Model folder** to the directory containing `generator.onnx` + `normalization.json` and click **Load model** instead.
 
 Load the output folder into Synth1 via **File → Load Bank**.
 
@@ -126,7 +130,7 @@ Open the repository in Zed. It will detect `.devcontainer/devcontainer.json` and
 
 | Component | Architecture |
 |-----------|-------------|
-| **Generator** | noise(10) → Linear(128) → Linear(256) → Linear(512) → Linear(1024) → Linear(93), BatchNorm + LeakyReLU(0.2), Tanh output |
-| **Discriminator** | preset(93) → Linear(64) → Linear(32) → Linear(1), LeakyReLU(0.2) |
+| **Generator** | noise(10) → Linear(128) → Linear(256) → Linear(512) → Linear(1024) → Linear(105), BatchNorm + LeakyReLU(0.2), Tanh output |
+| **Discriminator** | preset(105) → Linear(256) → Linear(128) → Linear(64) → Linear(1), LeakyReLU(0.2) |
 | **Training** | WGAN-GP, λ=10, 5 critic steps per generator step, Adam lr=0.0002 (β₁=0.5, β₂=0.999) |
-| **Features** | 93 dims: 52 continuous params + 41 one-hot encoded categorical params |
+| **Features** | 105 dims: 51 continuous params + 54 one-hot encoded categorical params |

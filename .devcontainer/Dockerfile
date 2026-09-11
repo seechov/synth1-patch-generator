@@ -1,7 +1,10 @@
-FROM mcr.microsoft.com/devcontainers/python:3.11-bullseye
+FROM mcr.microsoft.com/devcontainers/python:3.11-bookworm
 
 # Remove yarn repo from base image — its GPG key is expired and breaks apt-get update
 RUN rm -f /etc/apt/sources.list.d/yarn.list
+
+# disable check
+# RUN echo 'Acquire::Check-Valid-Until "false";' > /etc/apt/apt.conf.d/99disable-check-valid-until
 
 # System deps for Rust GUI compilation (Linux only — GUI builds for Windows cross-compile separately)
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -17,8 +20,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Rust stable toolchain
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable
-ENV PATH="/root/.cargo/bin:${PATH}"
+# RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable
+# ENV PATH="/root/.cargo/bin:${PATH}"
 
 # Install Python training dependencies (PyTorch CPU edition for the container)
 # For CUDA training, run train.py on your host Windows machine with a CUDA-enabled PyTorch

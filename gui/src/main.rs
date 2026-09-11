@@ -47,11 +47,7 @@ struct NormParams {
 
 // ─── ONNX model wrapper ───────────────────────────────────────────────────────
 
-type TracModel = SimplePlan<
-    TypedFact,
-    Box<dyn TypedOp>,
-    Graph<TypedFact, Box<dyn TypedOp>>,
->;
+type TracModel = SimplePlan<TypedFact, Box<dyn TypedOp>, Graph<TypedFact, Box<dyn TypedOp>>>;
 
 fn load_onnx(path: &Path, latent_dim: usize) -> TractResult<TracModel> {
     tract_onnx::onnx()
@@ -111,11 +107,7 @@ fn decode_preset(output: &[f32], params: &NormParams) -> HashMap<String, i64> {
 }
 
 /// Write a single preset to a .sy1 file.
-fn write_sy1(
-    path: &Path,
-    preset_name: &str,
-    params: &HashMap<String, i64>,
-) -> std::io::Result<()> {
+fn write_sy1(path: &Path, preset_name: &str, params: &HashMap<String, i64>) -> std::io::Result<()> {
     let mut lines = vec![
         preset_name.to_string(),
         "color=red".to_string(),
@@ -147,19 +139,66 @@ struct App {
 
 impl App {
     fn new(_cc: &eframe::CreationContext<'_>) -> Self {
-        Self {
-            model_dir: String::new(),
-            output_dir: String::new(),
+        // Locate the bundled model (shipped next to the executable by the installer).
+        let model_dir = App::find_default_model_dir()
+            .map(|p| p.display().to_string())
+            .unwrap_or_default();
+
+        let mut app = Self {
+            model_dir,
+            output_dir: App::default_output_dir().unwrap_or_default(),
             num_presets: 16,
             bank_name: "SynthGAN".to_string(),
             log: Vec::new(),
             model: None,
             norm_params: None,
+        };
+
+        // Auto-load the bundled model so the user only has to click Generate.
+        if !app.model_dir.is_empty() {
+            app.log("Bundled model detected — loading…");
+            app.load_model();
         }
+
+        app
     }
 
     fn log(&mut self, msg: impl Into<String>) {
         self.log.push(msg.into());
+    }
+
+    /// Return a sensible default output folder (the user's Documents/Synth1GAN).
+    fn default_output_dir() -> Option<String> {
+        if let Some(docs) = dirs_document_dir() {
+            let dir = docs.join("Synth1GAN").join("presets");
+            return Some(dir.display().to_string());
+        }
+        None
+    }
+
+    /// Try to locate the bundled model folder shipped next to the executable.
+    ///
+    /// Search order:
+    ///   1. `<exe_dir>/model`   (Windows installer layout)
+    ///   2. `<exe_dir>`         (dev convenience — files sit next to the binary)
+    ///   3. `/usr/share/synth1gan/model` (Linux deb/rpm layout)
+    fn find_default_model_dir() -> Option<PathBuf> {
+        let mut candidates: Vec<PathBuf> = Vec::new();
+        if let Some(exe_dir) = current_exe_dir() {
+            candidates.push(exe_dir.join("model"));
+            candidates.push(exe_dir);
+        }
+        #[cfg(not(target_os = "windows"))]
+        candidates.push(PathBuf::from("/usr/share/synth1gan/model"));
+
+        for candidate in candidates {
+            if candidate.join("generator.onnx").exists()
+                && candidate.join("normalization.json").exists()
+            {
+                return Some(candidate);
+            }
+        }
+        None
     }
 
     fn load_model(&mut self) {
@@ -269,95 +308,100 @@ impl App {
 
 impl eframe::App for App {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
-        egui::SidePanel::left("settings").min_width(260.0).show(ctx, |ui| {
-            ui.add_space(8.0);
-            ui.heading("Synth1GAN");
-            ui.add_space(4.0);
-            ui.separator();
-
-            // ── Model folder ──
-            ui.add_space(8.0);
-            ui.label(RichText::new("Model folder").strong());
-            ui.horizontal(|ui| {
-                ui.add(
-                    TextEdit::singleline(&mut self.model_dir)
-                        .hint_text("path/to/model/")
-                        .desired_width(160.0),
-                );
-                if ui.button("…").clicked() {
-                    if let Some(p) = rfd::FileDialog::new().pick_folder() {
-                        self.model_dir = p.display().to_string();
-                    }
-                }
-            });
-            let btn_label = if self.model_loaded() {
-                "↺ Reload"
-            } else {
-                "Load model"
-            };
-            if ui.button(btn_label).clicked() {
-                self.load_model();
-            }
-            if self.model_loaded() {
-                ui.colored_label(egui::Color32::GREEN, "● model ready");
-            }
-
-            ui.add_space(12.0);
-            ui.separator();
-
-            // ── Output settings ──
-            ui.add_space(8.0);
-            ui.label(RichText::new("Output folder").strong());
-            ui.horizontal(|ui| {
-                ui.add(
-                    TextEdit::singleline(&mut self.output_dir)
-                        .hint_text("path/to/output/")
-                        .desired_width(160.0),
-                );
-                if ui.button("…").clicked() {
-                    if let Some(p) = rfd::FileDialog::new().pick_folder() {
-                        self.output_dir = p.display().to_string();
-                    }
-                }
-            });
-
-            ui.add_space(8.0);
-            ui.label(RichText::new("Bank name").strong());
-            ui.text_edit_singleline(&mut self.bank_name);
-
-            ui.add_space(8.0);
-            ui.label(RichText::new("Number of presets").strong());
-            ui.add(egui::Slider::new(&mut self.num_presets, 1..=128).suffix(" presets"));
-
-            ui.add_space(16.0);
-            ui.separator();
-            ui.add_space(8.0);
-
-            // ── Generate button ──
-            let generate_enabled = self.model_loaded() && !self.output_dir.is_empty();
-            ui.add_enabled_ui(generate_enabled, |ui| {
-                if ui
-                    .add_sized([ui.available_width(), 36.0], egui::Button::new("⚡ Generate"))
-                    .clicked()
-                {
-                    self.generate();
-                }
-            });
-
-            if !generate_enabled {
+        egui::SidePanel::left("settings")
+            .min_width(260.0)
+            .show(ctx, |ui| {
+                ui.add_space(8.0);
+                ui.heading("Synth1GAN");
                 ui.add_space(4.0);
-                ui.label(
-                    RichText::new("Load a model and choose an output folder first.")
-                        .small()
-                        .color(egui::Color32::GRAY),
-                );
-            }
+                ui.separator();
 
-            ui.add_space(8.0);
-            if ui.small_button("Clear log").clicked() {
-                self.log.clear();
-            }
-        });
+                // ── Model folder ──
+                ui.add_space(8.0);
+                ui.label(RichText::new("Model folder").strong());
+                ui.horizontal(|ui| {
+                    ui.add(
+                        TextEdit::singleline(&mut self.model_dir)
+                            .hint_text("path/to/model/")
+                            .desired_width(160.0),
+                    );
+                    if ui.button("…").clicked() {
+                        if let Some(p) = rfd::FileDialog::new().pick_folder() {
+                            self.model_dir = p.display().to_string();
+                        }
+                    }
+                });
+                let btn_label = if self.model_loaded() {
+                    "↺ Reload"
+                } else {
+                    "Load model"
+                };
+                if ui.button(btn_label).clicked() {
+                    self.load_model();
+                }
+                if self.model_loaded() {
+                    ui.colored_label(egui::Color32::GREEN, "● model ready");
+                }
+
+                ui.add_space(12.0);
+                ui.separator();
+
+                // ── Output settings ──
+                ui.add_space(8.0);
+                ui.label(RichText::new("Output folder").strong());
+                ui.horizontal(|ui| {
+                    ui.add(
+                        TextEdit::singleline(&mut self.output_dir)
+                            .hint_text("path/to/output/")
+                            .desired_width(160.0),
+                    );
+                    if ui.button("…").clicked() {
+                        if let Some(p) = rfd::FileDialog::new().pick_folder() {
+                            self.output_dir = p.display().to_string();
+                        }
+                    }
+                });
+
+                ui.add_space(8.0);
+                ui.label(RichText::new("Bank name").strong());
+                ui.text_edit_singleline(&mut self.bank_name);
+
+                ui.add_space(8.0);
+                ui.label(RichText::new("Number of presets").strong());
+                ui.add(egui::Slider::new(&mut self.num_presets, 1..=128).suffix(" presets"));
+
+                ui.add_space(16.0);
+                ui.separator();
+                ui.add_space(8.0);
+
+                // ── Generate button ──
+                let generate_enabled = self.model_loaded() && !self.output_dir.is_empty();
+                ui.add_enabled_ui(generate_enabled, |ui| {
+                    if ui
+                        .add_sized(
+                            [ui.available_width(), 36.0],
+                            egui::Button::new("⚡ Generate"),
+                        )
+                        .clicked()
+                    {
+                        self.generate();
+                    }
+                });
+
+                if !generate_enabled {
+                    ui.add_space(4.0);
+                    ui.label(
+                        RichText::new("Load a model and choose an output folder first.")
+                            .small()
+                            .color(egui::Color32::GRAY),
+                    );
+                }
+
+                ui.add_space(8.0);
+                if ui.small_button("Clear log").clicked() {
+                    self.log.clear();
+                }
+            });
 
         // ── Log panel ──
         egui::CentralPanel::default().show(ctx, |ui| {
@@ -378,6 +422,32 @@ impl eframe::App for App {
                     }
                 });
         });
+    }
+}
+
+// ─── Path helpers ────────────────────────────────────────────────────────────
+
+/// Directory containing the running executable.
+fn current_exe_dir() -> Option<PathBuf> {
+    std::env::current_exe()
+        .ok()?
+        .parent()
+        .map(|p| p.to_path_buf())
+}
+
+/// Resolve the user's Documents directory in a cross-platform way.
+///
+/// On Windows, `%USERPROFILE%\Documents`. On Unix, `~/Documents`
+/// (XDG documents dir is not reliably set, so we fall back to the convention).
+fn dirs_document_dir() -> Option<PathBuf> {
+    #[cfg(target_os = "windows")]
+    {
+        std::env::var_os("USERPROFILE").map(|v| PathBuf::from(v).join("Documents"))
+    }
+
+    #[cfg(not(target_os = "windows"))]
+    {
+        std::env::var_os("HOME").map(|v| PathBuf::from(v).join("Documents"))
     }
 }
 

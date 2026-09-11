@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=Synth1GAN
+Comment=Synth1 VST preset generator powered by a WGAN-GP neural network
+Exec=synth1gan
+Type=Application
+Categories=Audio;Music;
+Terminal=false

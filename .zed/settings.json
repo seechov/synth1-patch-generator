@@ -35,5 +35,12 @@
     "**/.venv",
     "**/*.onnx",
     "**/checkpoints"
-  ]
+  ],
+  "agent_servers": {
+    "DeepSeek Harness": {
+      "type": "custom",
+      "command": "dsh",
+      "args": ["--profile", "acp"]
+    }
+  }
 }

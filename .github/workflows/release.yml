@@ -1,0 +1,169 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+
+permissions:
+  contents: write
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build-windows:
+    name: Windows installer
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            gui/target
+          key: windows-cargo-${{ hashFiles('gui/Cargo.lock') }}
+
+      - name: Build
+        working-directory: gui
+        run: cargo build --release
+
+      - name: Get version
+        id: version
+        shell: bash
+        run: echo "VERSION=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Create installer
+        run: >
+          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe"
+          /DMyAppVersion="${{ steps.version.outputs.VERSION }}"
+          installer\windows\setup.iss
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-installer
+          path: dist\*.exe
+
+  build-linux:
+    name: Linux deb + rpm
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install system libraries
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y \
+            libgtk-3-dev \
+            libxcb-render0-dev \
+            libxcb-shape0-dev \
+            libxcb-xfixes0-dev \
+            libxkbcommon-dev \
+            libgl1-mesa-dev
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            gui/target
+          key: linux-cargo-${{ hashFiles('gui/Cargo.lock') }}
+
+      - name: Install cargo-binstall
+        uses: cargo-bins/cargo-binstall@main
+
+      - name: Install packaging tools
+        run: cargo binstall --no-confirm cargo-deb cargo-generate-rpm
+
+      - name: Build
+        working-directory: gui
+        run: cargo build --release
+
+      - name: Build .deb
+        working-directory: gui
+        run: cargo deb --no-build
+
+      - name: Build .rpm
+        working-directory: gui
+        run: cargo generate-rpm
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linux-packages
+          path: |
+            gui/target/debian/*.deb
+            gui/target/generate-rpm/*.rpm
+
+  build-macos:
+    name: macOS DMG
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            gui/target
+          key: macos-cargo-${{ hashFiles('gui/Cargo.lock') }}
+
+      - name: Build
+        working-directory: gui
+        run: cargo build --release
+
+      - name: Get version
+        id: version
+        shell: bash
+        run: echo "VERSION=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Create .app bundle
+        run: |
+          APP="dist/Synth1GAN.app"
+          mkdir -p "$APP/Contents/MacOS/model" "$APP/Contents/Resources"
+          cp gui/target/release/synth1gan "$APP/Contents/MacOS/synth1gan"
+          cp installer/macos/Info.plist "$APP/Contents/Info.plist"
+          cp installer/trained-model/generator.onnx "$APP/Contents/MacOS/model/generator.onnx"
+          cp installer/trained-model/normalization.json "$APP/Contents/MacOS/model/normalization.json"
+
+      - name: Create DMG
+        run: |
+          mkdir -p dist/dmg_src
+          cp -r dist/Synth1GAN.app dist/dmg_src/
+          ln -sf /Applications dist/dmg_src/Applications
+          hdiutil create \
+            -volname "Synth1GAN" \
+            -srcfolder dist/dmg_src \
+            -ov -format UDZO \
+            "dist/synth1gan-${{ steps.version.outputs.VERSION }}-macos.dmg"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: macos-dmg
+          path: dist/synth1gan-*.dmg
+
+  release:
+    name: GitHub Release
+    needs: [build-windows, build-linux, build-macos]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: |
+            artifacts/windows-installer/*.exe
+            artifacts/linux-packages/*.deb
+            artifacts/linux-packages/*.rpm
+            artifacts/macos-dmg/*.dmg
