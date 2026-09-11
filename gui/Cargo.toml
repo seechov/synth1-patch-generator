@@ -1,6 +1,6 @@
 [package]
 name = "synth1gan"
-version = "1"
+version = "1.0.0"
 edition = "2021"
 authors = ["Aleksei Sychev <seechov@protonmail.com>"]
 description = "Synth1 VST preset generator powered by a WGAN-GP neural network"
