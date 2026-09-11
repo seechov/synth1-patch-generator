@@ -337,16 +337,23 @@ class Generator(nn.Module):
 
 
 class Discriminator(nn.Module):
-    def __init__(self, data_size: int):
+    def __init__(self, data_size: int, use_spectral_norm: bool = False):
         super().__init__()
+
+        def linear(in_feat: int, out_feat: int) -> nn.Module:
+            layer = nn.Linear(in_feat, out_feat)
+            if use_spectral_norm:
+                layer = nn.utils.spectral_norm(layer)
+            return layer
+
         self.model = nn.Sequential(
-            nn.Linear(data_size, 256),
+            linear(data_size, 256),
             nn.LeakyReLU(0.2, inplace=True),
-            nn.Linear(256, 128),
+            linear(256, 128),
             nn.LeakyReLU(0.2, inplace=True),
-            nn.Linear(128, 64),
+            linear(128, 64),
             nn.LeakyReLU(0.2, inplace=True),
-            nn.Linear(64, 1),
+            linear(64, 1),
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -395,7 +402,8 @@ def train(
     n_epochs: int,
     batch_size: int,
     latent_dim: int,
-    lr: float,
+    lr_g: float,
+    lr_d: float,
     n_critic: int,
     lambda_gp: float,
     sample_interval: int,
@@ -403,6 +411,8 @@ def train(
     cat_vars: dict[str, int],
     batch_norm: bool = True,
     ema_decay: float | None = 0.999,
+    spectral_norm: bool = False,
+    d_noise_std: float = 0.0,
 ) -> tuple[Generator, Generator | None]:
     os.makedirs(output_dir, exist_ok=True)
     checkpoints_dir = os.path.join(output_dir, "checkpoints")
@@ -455,7 +465,7 @@ def train(
     )
 
     generator = Generator(latent_dim, n_cont, group_sizes, batch_norm).to(device)
-    discriminator = Discriminator(data_size).to(device)
+    discriminator = Discriminator(data_size, spectral_norm).to(device)
 
     # Exponential moving average of the generator weights. Used for the final
     # export; it suppresses transient quality spikes/dips during training.
@@ -466,11 +476,14 @@ def train(
         for p in gen_ema.parameters():
             p.requires_grad_(False)
 
-    opt_G = torch.optim.Adam(generator.parameters(), lr=lr, betas=(0.5, 0.999))
-    opt_D = torch.optim.Adam(discriminator.parameters(), lr=lr, betas=(0.5, 0.999))
+    opt_G = torch.optim.Adam(generator.parameters(), lr=lr_g, betas=(0.5, 0.999))
+    opt_D = torch.optim.Adam(discriminator.parameters(), lr=lr_d, betas=(0.5, 0.999))
 
     print(
         f"\nStarting training: {n_epochs} epochs, batch={batch_size}, latent_dim={latent_dim}"
+    )
+    print(
+        f"  lr_G={lr_g}, lr_D={lr_d}, spectral_norm={spectral_norm}, d_noise_std={d_noise_std}"
     )
     print("─" * 70)
 
@@ -484,9 +497,17 @@ def train(
             z = torch.randn(real_imgs.size(0), latent_dim, device=device)
             fake_imgs = generator(z).detach()
 
-            real_val = discriminator(real_imgs)
-            fake_val = discriminator(fake_imgs)
-            gp = compute_gradient_penalty(discriminator, real_imgs, fake_imgs, device)
+            # Optional feature noise on the discriminator input: discourages the
+            # discriminator from overfitting exact features and helps diversity.
+            d_real = real_imgs
+            d_fake = fake_imgs
+            if d_noise_std > 0.0:
+                d_real = real_imgs + torch.randn_like(real_imgs) * d_noise_std
+                d_fake = fake_imgs + torch.randn_like(fake_imgs) * d_noise_std
+
+            real_val = discriminator(d_real)
+            fake_val = discriminator(d_fake)
+            gp = compute_gradient_penalty(discriminator, d_real, d_fake, device)
             d_loss = -real_val.mean() + fake_val.mean() + lambda_gp * gp
             d_loss.backward()
             opt_D.step()
@@ -512,7 +533,7 @@ def train(
                 batches_done += 1
 
                 # Update EMA weights after each generator step (if enabled).
-                if gen_ema is not None:
+                if gen_ema is not None and ema_decay is not None:
                     with torch.no_grad():
                         for ema_p, g_p in zip(
                             gen_ema.parameters(), generator.parameters()
@@ -646,7 +667,12 @@ def main() -> None:
     parser.add_argument("--epochs", type=int, default=20000, help="Training epochs")
     parser.add_argument("--batch-size", type=int, default=64)
     parser.add_argument("--latent-dim", type=int, default=10, help="Noise vector size")
-    parser.add_argument("--lr", type=float, default=0.0002, help="Learning rate")
+    parser.add_argument(
+        "--lr-g", type=float, default=0.0002, help="Generator learning rate"
+    )
+    parser.add_argument(
+        "--lr-d", type=float, default=0.0002, help="Discriminator learning rate"
+    )
     parser.add_argument(
         "--n-critic", type=int, default=5, help="Discriminator steps per generator step"
     )
@@ -667,6 +693,17 @@ def main() -> None:
         type=float,
         default=0.999,
         help="EMA decay for generator weights (None/0 disables EMA)",
+    )
+    parser.add_argument(
+        "--spectral-norm",
+        action="store_true",
+        help="Use spectral normalization in the discriminator",
+    )
+    parser.add_argument(
+        "--d-noise-std",
+        type=float,
+        default=0.0,
+        help="Std of Gaussian noise added to discriminator inputs",
     )
     parser.add_argument(
         "--seed", type=int, default=None, help="Random seed for reproducibility"
@@ -709,7 +746,8 @@ def main() -> None:
         n_epochs=args.epochs,
         batch_size=args.batch_size,
         latent_dim=args.latent_dim,
-        lr=args.lr,
+        lr_g=args.lr_g,
+        lr_d=args.lr_d,
         n_critic=args.n_critic,
         lambda_gp=args.lambda_gp,
         sample_interval=args.sample_interval,
@@ -717,6 +755,8 @@ def main() -> None:
         cat_vars=cat_vars,
         batch_norm=args.batch_norm,
         ema_decay=ema_decay,
+        spectral_norm=args.spectral_norm,
+        d_noise_std=args.d_noise_std,
     )
 
     # 6. Export
