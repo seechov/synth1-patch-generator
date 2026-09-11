@@ -448,16 +448,22 @@ def train(
         f"({n_cont} continuous, {n_one_hot} one-hot in {len(group_sizes)} groups), "
         f"{len(df_train)} presets"
     )
+
+    # Clamp batch size to the dataset. A tiny batch makes the gradient-penalty
+    # estimate noisy and unstable; drop_last would skip everything if it exceeds
+    # the dataset size.
+    eff_batch = batch_size
     if batch_size > len(df_train):
+        eff_batch = max(1, len(df_train) // 4)
         print(
-            f"  Warning: batch_size ({batch_size}) > dataset size ({len(df_train)})"
-            "; training will skip every batch (drop_last)."
+            f"  Warning: batch_size ({batch_size}) > dataset size ({len(df_train)}); "
+            f"using batch_size={eff_batch}"
         )
 
     dataset = PresetDataset(df_train)
     dataloader = DataLoader(
         dataset,
-        batch_size=batch_size,
+        batch_size=eff_batch,
         shuffle=True,
         drop_last=True,
         num_workers=0,
@@ -480,7 +486,7 @@ def train(
     opt_D = torch.optim.Adam(discriminator.parameters(), lr=lr_d, betas=(0.5, 0.999))
 
     print(
-        f"\nStarting training: {n_epochs} epochs, batch={batch_size}, latent_dim={latent_dim}"
+        f"\nStarting training: {n_epochs} epochs, batch={eff_batch}, latent_dim={latent_dim}"
     )
     print(
         f"  lr_G={lr_g}, lr_D={lr_d}, spectral_norm={spectral_norm}, d_noise_std={d_noise_std}"
@@ -666,7 +672,7 @@ def main() -> None:
     parser.add_argument("--output-dir", default="./model", help="Output directory")
     parser.add_argument("--epochs", type=int, default=20000, help="Training epochs")
     parser.add_argument("--batch-size", type=int, default=64)
-    parser.add_argument("--latent-dim", type=int, default=10, help="Noise vector size")
+    parser.add_argument("--latent-dim", type=int, default=32, help="Noise vector size")
     parser.add_argument(
         "--lr-g", type=float, default=0.0002, help="Generator learning rate"
     )
