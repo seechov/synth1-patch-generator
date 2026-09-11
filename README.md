@@ -62,8 +62,15 @@ Use the Synth1 factory bank, free soundbanks, or any combination.
 | Option | Default | Description |
 |--------|---------|-------------|
 | `--epochs` | 20000 | More = better quality (diminishing returns after ~10k) |
-| `--batch-size` | 64 | Reduce to 32 if you get out-of-memory errors |
-| `--latent-dim` | 10 | Latent noise vector size |
+| `--batch-size` | 64 | Clamped automatically if it exceeds the dataset size |
+| `--latent-dim` | 32 | Latent noise vector size |
+| `--lr-g` | 0.0002 | Generator learning rate |
+| `--lr-d` | 0.0002 | Discriminator learning rate |
+| `--batch-norm` | on | Use BatchNorm in the generator trunk |
+| `--ema-decay` | 0.999 | EMA decay for generator weights (`0` disables) |
+| `--spectral-norm` | off | Use spectral normalization in the discriminator |
+| `--d-noise-std` | 0.0 | Std of Gaussian noise added to discriminator inputs |
+| `--seed` | — | Random seed for reproducibility |
 
 When done you will have:
 
@@ -130,7 +137,7 @@ Open the repository in Zed. It will detect `.devcontainer/devcontainer.json` and
 
 | Component | Architecture |
 |-----------|-------------|
-| **Generator** | noise(10) → Linear(128) → Linear(256) → Linear(512) → Linear(1024) → Linear(105), BatchNorm + LeakyReLU(0.2), Tanh output |
-| **Discriminator** | preset(105) → Linear(256) → Linear(128) → Linear(64) → Linear(1), LeakyReLU(0.2) |
-| **Training** | WGAN-GP, λ=10, 5 critic steps per generator step, Adam lr=0.0002 (β₁=0.5, β₂=0.999) |
-| **Features** | 105 dims: 51 continuous params + 54 one-hot encoded categorical params |
+| **Generator** | noise(N) → shared trunk (128→256→512→1024, BatchNorm + LeakyReLU) → a `Tanh` head for continuous features + a `softmax` head per categorical variable |
+| **Discriminator** | preset(F) → Linear(256) → Linear(128) → Linear(64) → Linear(1), LeakyReLU(0.2), optional spectral norm |
+| **Training** | WGAN-GP, λ=10, 5 critic steps per generator step, Adam lr_g/lr_d=0.0002 (β₁=0.5, β₂=0.999), exponential moving average of generator weights |
+| **Features** | continuous parameters scaled to [-1, 1]; categoricals one-hot encoded (kept 0/1) |
