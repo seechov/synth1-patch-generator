@@ -19,6 +19,7 @@ import csv
 import glob
 import json
 import os
+import random
 import sys
 from pathlib import Path
 
@@ -201,7 +202,12 @@ def build_dataframe(presets: list[dict]) -> pd.DataFrame:
 
 def engineer_features(
     df: pd.DataFrame,
-) -> tuple[pd.DataFrame, dict[str, int], dict[str, OneHotEncoder]]:
+) -> tuple[pd.DataFrame, dict[str, int], dict[str, OneHotEncoder], set[str]]:
+    """Build the training DataFrame and return stats needed downstream.
+
+    Returns (df, cat_vars, encoders, one_hot_cols) where one_hot_cols is the set
+    of generated one-hot column names (e.g. "filter type-0").
+    """
     # Drop metadata and non-useful synthesis columns
     drop_existing = [c for c in TO_DROP if c in df.columns]
     df = df.drop(columns=drop_existing)
@@ -218,6 +224,7 @@ def engineer_features(
     # One-hot encode known categorical variables
     cat_vars: dict[str, int] = {}
     encoders: dict[str, OneHotEncoder] = {}
+    one_hot_cols: set[str] = set()
 
     new_cols = []
     for col in CATEGORICAL_VARS:
@@ -239,6 +246,7 @@ def engineer_features(
             columns=[f"{col}-{i}" for i in range(encoded.shape[1])],
             index=df.index,
         )
+        one_hot_cols.update(encoded_df.columns.tolist())
         new_cols.append(encoded_df)
         df = df.drop(columns=[col])
 
@@ -248,43 +256,83 @@ def engineer_features(
 
     print(f"  Categorical columns: {list(cat_vars.keys())}")
     print(f"  Total features after encoding: {df.shape[1]}")
-    return df, cat_vars, encoders
+    return df, cat_vars, encoders, one_hot_cols
 
 
-def normalize(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.Series, pd.Series]:
-    """Scale all values to [-1, 1] for tanh output layer."""
-    min_vals = df.min()
-    max_vals = df.max()
+def normalize(
+    df: pd.DataFrame,
+    one_hot_cols: set[str],
+) -> tuple[pd.DataFrame, pd.Series | None, pd.Series | None]:
+    """Scale continuous columns to [-1, 1]; leave one-hot columns as 0/1.
+
+    Returns (df_out, min_vals, max_vals). min_vals/max_vals are None when there
+    are no continuous columns (all features are one-hot encoded).
+    """
+    cont_cols = [c for c in df.columns if c not in one_hot_cols]
+    if not cont_cols:
+        return df.copy(), None, None
+
+    min_vals = df[cont_cols].min()
+    max_vals = df[cont_cols].max()
     range_vals = (max_vals - min_vals).replace(0, 1)  # avoid div/0
-    df_norm = 2.0 * ((df - min_vals) / range_vals) - 1.0
-    return df_norm, min_vals, max_vals
+    df_cont = 2.0 * ((df[cont_cols] - min_vals) / range_vals) - 1.0
+
+    out = df.copy()
+    out[cont_cols] = df_cont
+    return out, min_vals, max_vals
 
 
 # ─── Model architecture ───────────────────────────────────────────────────────
 
 
 class Generator(nn.Module):
-    def __init__(self, latent_dim: int, data_size: int):
+    def __init__(
+        self,
+        latent_dim: int,
+        n_cont: int,
+        group_sizes: list[int],
+        batch_norm: bool = True,
+    ):
         super().__init__()
 
         def block(in_feat: int, out_feat: int, normalize: bool = True) -> list:
             layers: list = [nn.Linear(in_feat, out_feat)]
-            if normalize:
+            if normalize and batch_norm:
                 layers.append(nn.BatchNorm1d(out_feat, 0.8))
             layers.append(nn.LeakyReLU(0.2, inplace=True))
             return layers
 
-        self.model = nn.Sequential(
+        # Shared trunk: maps latent vector → high-level feature representation.
+        self.trunk = nn.Sequential(
             *block(latent_dim, 128, normalize=False),
             *block(128, 256),
             *block(256, 512),
             *block(512, 1024),
-            nn.Linear(1024, data_size),
-            nn.Tanh(),
+        )
+
+        # Continuous head outputs values in [-1, 1] for tanh-style denormalization.
+        self.cont_head = nn.Linear(1024, n_cont) if n_cont > 0 else None
+
+        # Categorical heads: one head per categorical variable, each emitting a
+        # softmax distribution over that variable's classes.
+        self.cat_heads = (
+            nn.ModuleList([nn.Linear(1024, n_cls) for n_cls in group_sizes])
+            if group_sizes
+            else None
         )
 
     def forward(self, z: torch.Tensor) -> torch.Tensor:
-        return self.model(z)
+        h = self.trunk(z)
+        parts: list[torch.Tensor] = []
+
+        if self.cont_head is not None:
+            parts.append(torch.tanh(self.cont_head(h)))
+
+        if self.cat_heads is not None:
+            for head in self.cat_heads:
+                parts.append(torch.softmax(head(h), dim=1))
+
+        return torch.cat(parts, dim=1)
 
 
 class Discriminator(nn.Module):
@@ -350,6 +398,9 @@ def train(
     n_critic: int,
     lambda_gp: float,
     sample_interval: int,
+    one_hot_cols: set[str],
+    cat_vars: dict[str, int],
+    batch_norm: bool = True,
 ) -> Generator:
     os.makedirs(output_dir, exist_ok=True)
     checkpoints_dir = os.path.join(output_dir, "checkpoints")
@@ -361,20 +412,47 @@ def train(
     if device.type == "cuda":
         torch.cuda.set_per_process_memory_fraction(0.85)  # ~3.5 ГБ из 4
 
-    data_size = df_norm.shape[1]
-    print(f"  Data size: {data_size} features, {len(df_norm)} presets")
+    # Order output features: continuous columns first, then one-hot groups. The
+    # generator builds exactly this layout so reconstruction is unambiguous.
+    cont_cols = [c for c in df_norm.columns if c not in one_hot_cols]
+    one_hot_cols_ordered = [c for c in df_norm.columns if c in one_hot_cols]
+    ordered_cols = cont_cols + one_hot_cols_ordered
+    df_train = df_norm[ordered_cols]
 
-    dataset = PresetDataset(df_norm)
+    data_size = df_train.shape[1]
+    n_cont = len(cont_cols)
+    n_one_hot = len(one_hot_cols_ordered)
+
+    # Group sizes (number of classes per categorical head) in the same order as
+    # one_hot_cols_ordered. cat_vars preserves CATEGORICAL_VARS order (skipping
+    # variables with < 2 unique values), matching the column concat order.
+    group_sizes: list[int] = []
+    for col in CATEGORICAL_VARS:
+        if col in cat_vars:
+            group_sizes.append(cat_vars[col])
+
+    print(
+        f"  Data size: {data_size} features "
+        f"({n_cont} continuous, {n_one_hot} one-hot in {len(group_sizes)} groups), "
+        f"{len(df_train)} presets"
+    )
+    if batch_size > len(df_train):
+        print(
+            f"  Warning: batch_size ({batch_size}) > dataset size ({len(df_train)})"
+            "; training will skip every batch (drop_last)."
+        )
+
+    dataset = PresetDataset(df_train)
     dataloader = DataLoader(
         dataset,
         batch_size=batch_size,
         shuffle=True,
         drop_last=True,
         num_workers=0,
-        pin_memory=True,
+        pin_memory=(device.type == "cuda"),
     )
 
-    generator = Generator(latent_dim, data_size).to(device)
+    generator = Generator(latent_dim, n_cont, group_sizes, batch_norm).to(device)
     discriminator = Discriminator(data_size).to(device)
 
     opt_G = torch.optim.Adam(generator.parameters(), lr=lr, betas=(0.5, 0.999))
@@ -420,11 +498,19 @@ def train(
                     )
                     sys.stdout.flush()
 
-            batches_done += n_critic
+                batches_done += 1
 
         if epoch > 0 and epoch % 500 == 0:
             ckpt = os.path.join(checkpoints_dir, f"generator_{epoch}.pt")
-            torch.save(generator.state_dict(), ckpt)
+            torch.save(
+                {
+                    "state_dict": generator.state_dict(),
+                    "batch_norm": batch_norm,
+                    "n_cont": n_cont,
+                    "group_sizes": group_sizes,
+                },
+                ckpt,
+            )
             print(f"  Checkpoint saved: {ckpt}")
 
     print("─" * 70)
@@ -459,8 +545,8 @@ def export_onnx(generator: Generator, latent_dim: int, output_dir: str) -> str:
 
 def save_normalization(
     df_reduced: pd.DataFrame,
-    min_vals: pd.Series,
-    max_vals: pd.Series,
+    min_vals: pd.Series | None,
+    max_vals: pd.Series | None,
     cat_vars: dict[str, int],
     encoders: dict[str, OneHotEncoder],
     col_names: list[str],
@@ -476,10 +562,13 @@ def save_normalization(
         for i in range(n):
             one_hot_col_names.add(f"{col}-{i}")
 
-    # Continuous columns with their index in the output vector
+    # Continuous columns with their index in the output vector. Only continuous
+    # columns have min/max; one-hot columns are emitted directly by softmax.
     continuous_stats: dict = {}
     for idx, col in enumerate(col_names):
         if col in one_hot_col_names:
+            continue
+        if min_vals is None or col not in min_vals.index:
             continue
         continuous_stats[col] = {
             "col_idx": idx,
@@ -488,7 +577,9 @@ def save_normalization(
             "param_id": name_to_id.get(col, col),
         }
 
-    # Categorical encodings
+    # Categorical encodings. Since continuous columns are ordered first and
+    # one-hot columns are appended in CATEGORICAL_VARS order, each group's
+    # start_idx is its position within the full output vector.
     categorical_encodings: dict = {}
     for col, enc in encoders.items():
         start_idx = next(i for i, n in enumerate(col_names) if n == f"{col}-0")
@@ -542,7 +633,21 @@ def main() -> None:
     parser.add_argument(
         "--sample-interval", type=int, default=400, help="Log every N batches"
     )
+    parser.add_argument(
+        "--batch-norm",
+        action="store_true",
+        default=True,
+        help="Use BatchNorm in the generator trunk (default: on)",
+    )
+    parser.add_argument(
+        "--seed", type=int, default=None, help="Random seed for reproducibility"
+    )
     args = parser.parse_args()
+
+    if args.seed is not None:
+        random.seed(args.seed)
+        np.random.seed(args.seed)
+        torch.manual_seed(args.seed)
 
     print("\n=== Synth1GAN Training ===\n")
 
@@ -559,11 +664,11 @@ def main() -> None:
 
     # 3. Feature engineering
     print("\nStep 3/5 — Feature engineering")
-    df_reduced, cat_vars, encoders = engineer_features(df)
+    df_reduced, cat_vars, encoders, one_hot_cols = engineer_features(df)
     print(f"  Dataset shape: {df_reduced.shape}")
 
-    # 4. Normalize
-    df_norm, min_vals, max_vals = normalize(df_reduced)
+    # 4. Normalize (continuous only; one-hot stays 0/1)
+    df_norm, min_vals, max_vals = normalize(df_reduced, one_hot_cols)
     col_names = list(df_norm.columns)
 
     # 5. Train
@@ -578,6 +683,9 @@ def main() -> None:
         n_critic=args.n_critic,
         lambda_gp=args.lambda_gp,
         sample_interval=args.sample_interval,
+        one_hot_cols=one_hot_cols,
+        cat_vars=cat_vars,
+        batch_norm=args.batch_norm,
     )
 
     # 6. Export
