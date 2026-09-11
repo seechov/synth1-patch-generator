@@ -3069,7 +3069,7 @@ dependencies = [
 
 [[package]]
 name = "synth1gan"
-version = "0.1.0"
+version = "1"
 dependencies = [
  "eframe",
  "egui",
