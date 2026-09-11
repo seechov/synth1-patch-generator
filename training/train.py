@@ -15,6 +15,7 @@ The script will:
 """
 
 import argparse
+import copy
 import csv
 import glob
 import json
@@ -401,7 +402,8 @@ def train(
     one_hot_cols: set[str],
     cat_vars: dict[str, int],
     batch_norm: bool = True,
-) -> Generator:
+    ema_decay: float | None = 0.999,
+) -> tuple[Generator, Generator | None]:
     os.makedirs(output_dir, exist_ok=True)
     checkpoints_dir = os.path.join(output_dir, "checkpoints")
     os.makedirs(checkpoints_dir, exist_ok=True)
@@ -455,6 +457,15 @@ def train(
     generator = Generator(latent_dim, n_cont, group_sizes, batch_norm).to(device)
     discriminator = Discriminator(data_size).to(device)
 
+    # Exponential moving average of the generator weights. Used for the final
+    # export; it suppresses transient quality spikes/dips during training.
+    gen_ema: Generator | None = None
+    if ema_decay is not None:
+        gen_ema = copy.deepcopy(generator)
+        gen_ema.eval()
+        for p in gen_ema.parameters():
+            p.requires_grad_(False)
+
     opt_G = torch.optim.Adam(generator.parameters(), lr=lr, betas=(0.5, 0.999))
     opt_D = torch.optim.Adam(discriminator.parameters(), lr=lr, betas=(0.5, 0.999))
 
@@ -500,32 +511,44 @@ def train(
 
                 batches_done += 1
 
+                # Update EMA weights after each generator step (if enabled).
+                if gen_ema is not None:
+                    with torch.no_grad():
+                        for ema_p, g_p in zip(
+                            gen_ema.parameters(), generator.parameters()
+                        ):
+                            ema_p.mul_(ema_decay).add_(g_p, alpha=1.0 - ema_decay)
+
         if epoch > 0 and epoch % 500 == 0:
             ckpt = os.path.join(checkpoints_dir, f"generator_{epoch}.pt")
-            torch.save(
-                {
-                    "state_dict": generator.state_dict(),
-                    "batch_norm": batch_norm,
-                    "n_cont": n_cont,
-                    "group_sizes": group_sizes,
-                },
-                ckpt,
-            )
+            state = {
+                "state_dict": generator.state_dict(),
+                "batch_norm": batch_norm,
+                "n_cont": n_cont,
+                "group_sizes": group_sizes,
+            }
+            if gen_ema is not None:
+                state["ema_state_dict"] = gen_ema.state_dict()
+            torch.save(state, ckpt)
             print(f"  Checkpoint saved: {ckpt}")
 
     print("─" * 70)
     print("Training complete.")
-    return generator
+    return generator, gen_ema
 
 
 # ─── ONNX export ──────────────────────────────────────────────────────────────
 
 
-def export_onnx(generator: Generator, latent_dim: int, output_dir: str) -> str:
+def export_onnx(
+    generator: Generator,
+    latent_dim: int,
+    output_dir: str,
+    filename: str = "generator.onnx",
+) -> str:
     generator.eval()
-    # dummy = torch.randn(1, latent_dim)
     dummy = torch.randn(1, latent_dim).to(next(generator.parameters()).device)
-    path = os.path.join(output_dir, "generator.onnx")
+    path = os.path.join(output_dir, filename)
     torch.onnx.export(
         generator,
         dummy,
@@ -640,6 +663,12 @@ def main() -> None:
         help="Use BatchNorm in the generator trunk (default: on)",
     )
     parser.add_argument(
+        "--ema-decay",
+        type=float,
+        default=0.999,
+        help="EMA decay for generator weights (None/0 disables EMA)",
+    )
+    parser.add_argument(
         "--seed", type=int, default=None, help="Random seed for reproducibility"
     )
     args = parser.parse_args()
@@ -673,7 +702,8 @@ def main() -> None:
 
     # 5. Train
     print("\nStep 4/5 — Training WGAN-GP")
-    generator = train(
+    ema_decay = args.ema_decay if args.ema_decay and args.ema_decay > 0 else None
+    generator, gen_ema = train(
         df_norm,
         args.output_dir,
         n_epochs=args.epochs,
@@ -686,11 +716,14 @@ def main() -> None:
         one_hot_cols=one_hot_cols,
         cat_vars=cat_vars,
         batch_norm=args.batch_norm,
+        ema_decay=ema_decay,
     )
 
     # 6. Export
     print("\nStep 5/5 — Exporting")
-    export_onnx(generator, args.latent_dim, args.output_dir)
+    # Export the EMA generator when available (more stable than the last step).
+    export_model = gen_ema if gen_ema is not None else generator
+    export_onnx(export_model, args.latent_dim, args.output_dir)
     save_normalization(
         df_reduced,
         min_vals,
