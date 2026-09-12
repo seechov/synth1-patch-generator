@@ -137,7 +137,7 @@ fn preset_name(index: u32, rng: &mut impl rand::Rng) -> String {
     let nouns: Vec<&str> = NOUNS.lines().collect();
     let adj = adjectives.choose(rng).copied().unwrap_or("sonic");
     let noun = nouns.choose(rng).copied().unwrap_or("preset");
-    format!("{:03} {}-{}", index, adj, noun)
+    format!("{:03} {} {}", index, adj, noun)
 }
 
 /// Return a `<base>.zip` path that does not exist yet by appending a numeric

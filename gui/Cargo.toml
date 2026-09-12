@@ -43,6 +43,7 @@ depends = "$auto"
 assets = [
   ["target/release/synth1gan", "usr/bin/synth1gan", "755"],
   ["assets/synth1gan.desktop", "usr/share/applications/synth1gan.desktop", "644"],
+  ["assets/synth1gan.png", "usr/share/icons/hicolor/256x256/apps/synth1gan.png", "644"],
   ["../installer/trained-model/generator.onnx", "usr/share/synth1gan/model/generator.onnx", "644"],
   ["../installer/trained-model/normalization.json", "usr/share/synth1gan/model/normalization.json", "644"],
 ]
@@ -51,6 +52,7 @@ assets = [
 assets = [
   { source = "target/release/synth1gan", dest = "/usr/bin/synth1gan", mode = "755" },
   { source = "assets/synth1gan.desktop", dest = "/usr/share/applications/synth1gan.desktop", mode = "644" },
+  { source = "assets/synth1gan.png", dest = "/usr/share/icons/hicolor/256x256/apps/synth1gan.png", mode = "644" },
   { source = "../installer/trained-model/generator.onnx", dest = "/usr/share/synth1gan/model/generator.onnx", mode = "644" },
   { source = "../installer/trained-model/normalization.json", dest = "/usr/share/synth1gan/model/normalization.json", mode = "644" },
 ]
