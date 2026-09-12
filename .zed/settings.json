@@ -16,7 +16,9 @@
         "cargo": {
           "buildScripts": { "enable": true }
         },
-        "checkOnSave": { "command": "clippy" },
+        "rust-analyzer.check": {
+            "command": "clippy"
+        },
         "procMacro": { "enable": true }
       }
     },

@@ -3,12 +3,13 @@
 //! Workflow:
 //!   1. Point the app at a folder that contains generator.onnx + normalization.json
 //!   2. Choose output folder and preset count
-//!   3. Click Generate → .sy1 files appear in the output folder
+//!  3. Click Generate → a <bank-name>.zip archive appears in the output folder
 
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use std::collections::HashMap;
 use std::fs;
+use std::io::Write;
 use std::path::{Path, PathBuf};
 
 use eframe::egui::{self, RichText, ScrollArea, TextEdit};
@@ -106,8 +107,8 @@ fn decode_preset(output: &[f32], params: &NormParams) -> HashMap<String, i64> {
     result
 }
 
-/// Write a single preset to a .sy1 file.
-fn write_sy1(path: &Path, preset_name: &str, params: &HashMap<String, i64>) -> std::io::Result<()> {
+/// Render a preset to the .sy1 text format.
+fn sy1_content(preset_name: &str, params: &HashMap<String, i64>) -> String {
     let mut lines = vec![
         preset_name.to_string(),
         "color=red".to_string(),
@@ -119,7 +120,24 @@ fn write_sy1(path: &Path, preset_name: &str, params: &HashMap<String, i64>) -> s
     for (id, val) in sorted {
         lines.push(format!("{},{}", id, val));
     }
-    fs::write(path, lines.join("\n") + "\n")
+    lines.join("\n") + "\n"
+}
+
+/// Return a `<base>.zip` path that does not exist yet by appending a numeric
+/// suffix (`-2`, `-3`, …) when the plain name is already taken.
+fn unique_zip_path(dir: &Path, base: &str) -> PathBuf {
+    let candidate = dir.join(format!("{}.zip", base));
+    if !candidate.exists() {
+        return candidate;
+    }
+    let mut n = 2u32;
+    loop {
+        let candidate = dir.join(format!("{}-{}.zip", base, n));
+        if !candidate.exists() {
+            return candidate;
+        }
+        n += 1;
+    }
 }
 
 // ─── Application state ────────────────────────────────────────────────────────
@@ -265,40 +283,73 @@ impl App {
         let num_presets = self.num_presets;
         let bank = self.bank_name.clone();
         let mut new_logs: Vec<String> = Vec::new();
-        let mut ok = 0u32;
-        let mut err = 0u32;
 
-        {
+        let zip_path = unique_zip_path(&out_dir, &bank);
+
+        let result = {
             let model = self.model.as_ref().unwrap();
             let params = self.norm_params.as_ref().unwrap();
             let latent_dim = params.latent_dim;
             let output_dim = params.output_dim;
 
-            new_logs.push(format!("Generating {} presets…", num_presets));
+            Self::write_zip_archive(
+                &zip_path,
+                &bank,
+                num_presets,
+                model,
+                params,
+                latent_dim,
+                output_dim,
+            )
+        };
 
-            for i in 0..num_presets {
-                let output = generate_one(model, latent_dim, output_dim);
-                let preset_params = decode_preset(&output, params);
-                let preset_name = format!("{}-{:03}", bank, i + 1);
-                let file_path = out_dir.join(format!("{:03}.sy1", i + 1));
-
-                match write_sy1(&file_path, &preset_name, &preset_params) {
-                    Ok(_) => ok += 1,
-                    Err(e) => {
-                        new_logs.push(format!("  ✗ {:03}.sy1: {}", i + 1, e));
-                        err += 1;
-                    }
-                }
+        match result {
+            Ok(written) => {
+                new_logs.push(format!(
+                    "✓ Done: {} presets packed into {}",
+                    written,
+                    zip_path.display()
+                ));
+            }
+            Err(e) => {
+                new_logs.push(format!("✗ Failed to write {}: {}", zip_path.display(), e));
             }
         }
 
-        new_logs.push(format!(
-            "✓ Done: {} presets written to {}  ({} errors)",
-            ok,
-            out_dir.display(),
-            err
-        ));
         self.log.extend(new_logs);
+    }
+
+    fn write_zip_archive(
+        zip_path: &Path,
+        bank: &str,
+        num_presets: u32,
+        model: &TracModel,
+        params: &NormParams,
+        latent_dim: usize,
+        output_dim: usize,
+    ) -> Result<usize, String> {
+        let file = fs::File::create(zip_path).map_err(|e| e.to_string())?;
+        let mut zip = zip::ZipWriter::new(file);
+        let options: zip::write::SimpleFileOptions = zip::write::SimpleFileOptions::default()
+            .compression_method(zip::CompressionMethod::Deflated);
+
+        let mut written = 0usize;
+        for i in 0..num_presets {
+            let output = generate_one(model, latent_dim, output_dim);
+            let preset_params = decode_preset(&output, params);
+            let preset_name = format!("{}-{:03}", bank, i + 1);
+            let content = sy1_content(&preset_name, &preset_params);
+            let entry_name = format!("{:03}.sy1", i + 1);
+
+            zip.start_file(entry_name, options)
+                .map_err(|e| e.to_string())?;
+            zip.write_all(content.as_bytes())
+                .map_err(|e| e.to_string())?;
+            written += 1;
+        }
+
+        zip.finish().map_err(|e| e.to_string())?;
+        Ok(written)
     }
 
     fn model_loaded(&self) -> bool {

@@ -19,10 +19,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libgtk-3-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Rust stable toolchain
-# RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable
-# ENV PATH="/root/.cargo/bin:${PATH}"
-
 # Install Python training dependencies (PyTorch CPU edition for the container)
 # For CUDA training, run train.py on your host Windows machine with a CUDA-enabled PyTorch
 COPY training/requirements.txt /tmp/requirements.txt
