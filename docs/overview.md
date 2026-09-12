@@ -12,7 +12,7 @@ The project consists of two independent parts:
 
 | Part | Language | Purpose |
 |------|----------|---------|
-| **Training** (`training/`) | Python 3.11+ / PyTorch | Preset parsing, data preparation, model training, ONNX export |
+| **Training** (`training/`) | Python 3.12 / PyTorch | Preset parsing, data preparation, model training, ONNX export |
 | **Generation** (`gui/`) | Rust / egui / tract-onnx | Cross-platform app for generating presets from the trained model |
 
 The overall workflow:
@@ -141,7 +141,7 @@ Generation process:
 
 ### 4.1 Training the model
 
-Python 3.11+ is required. PyTorch is installed separately (GPU via CUDA 12.1, or CPU):
+Python 3.12 is required. PyTorch is installed separately (GPU via CUDA 12.1, or CPU). Training is supported on Python 3.12; newer versions may not work.
 
 ```powershell
 # GPU (CUDA 12.1)

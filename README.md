@@ -26,9 +26,11 @@ Synth1GAN/
 
 GPU is strongly recommended (~8 h on GTX 1070, ~30 min on RTX 3080). CPU training works but is very slow.
 
-### 1a. Install Python 3.11+
+### 1a. Install Python 3.12
 
 Download from https://www.python.org/downloads/windows/
+
+> Training is supported on Python 3.12. Newer versions may not work.
 
 ### 1b. Install PyTorch
 
