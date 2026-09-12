@@ -13,10 +13,17 @@ use std::io::Write;
 use std::path::{Path, PathBuf};
 
 use eframe::egui::{self, RichText, ScrollArea, TextEdit};
+use rand::seq::SliceRandom;
 use rand::thread_rng;
 use rand_distr::{Distribution, Normal};
 use serde::Deserialize;
 use tract_onnx::prelude::*;
+
+// ─── Preset-name word corpora ───────────────────────────────────────────────
+// Embed the English word lists directly into the binary at compile time.
+// Each corpus holds 1000 unique lowercase tokens (adjective / noun).
+static ADJECTIVES: &str = include_str!("../corpus/adjectives.txt");
+static NOUNS: &str = include_str!("../corpus/nouns.txt");
 
 // ─── Normalization types (mirrors normalization.json) ─────────────────────────
 
@@ -121,6 +128,16 @@ fn sy1_content(preset_name: &str, params: &HashMap<String, i64>) -> String {
         lines.push(format!("{},{}", id, val));
     }
     lines.join("\n") + "\n"
+}
+
+/// Build a random preset name: a three-digit index, an adjective and a noun.
+/// Example: `017 molten-horizon`.
+fn preset_name(index: u32, rng: &mut impl rand::Rng) -> String {
+    let adjectives: Vec<&str> = ADJECTIVES.lines().collect();
+    let nouns: Vec<&str> = NOUNS.lines().collect();
+    let adj = adjectives.choose(rng).copied().unwrap_or("sonic");
+    let noun = nouns.choose(rng).copied().unwrap_or("preset");
+    format!("{:03} {}-{}", index, adj, noun)
 }
 
 /// Return a `<base>.zip` path that does not exist yet by appending a numeric
@@ -294,7 +311,6 @@ impl App {
 
             Self::write_zip_archive(
                 &zip_path,
-                &bank,
                 num_presets,
                 model,
                 params,
@@ -321,7 +337,6 @@ impl App {
 
     fn write_zip_archive(
         zip_path: &Path,
-        bank: &str,
         num_presets: u32,
         model: &TracModel,
         params: &NormParams,
@@ -334,10 +349,11 @@ impl App {
             .compression_method(zip::CompressionMethod::Deflated);
 
         let mut written = 0usize;
+        let mut rng = thread_rng();
         for i in 0..num_presets {
             let output = generate_one(model, latent_dim, output_dim);
             let preset_params = decode_preset(&output, params);
-            let preset_name = format!("{}-{:03}", bank, i + 1);
+            let preset_name = preset_name(i + 1, &mut rng);
             let content = sy1_content(&preset_name, &preset_params);
             let entry_name = format!("{:03}.sy1", i + 1);
 
