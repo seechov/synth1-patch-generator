@@ -125,7 +125,7 @@ fn write_sy1(path: &Path, preset_name: &str, params: &HashMap<String, i64>) -> s
 // ─── Application state ────────────────────────────────────────────────────────
 
 struct App {
-    model_dir: String,
+    model_dir: String, // currently selected model folder
     output_dir: String,
     num_presets: u32,
     bank_name: String,
@@ -319,28 +319,34 @@ impl eframe::App for App {
                 // ── Model folder ──
                 ui.add_space(8.0);
                 ui.label(RichText::new("Model folder").strong());
-                ui.horizontal(|ui| {
-                    ui.add(
-                        TextEdit::singleline(&mut self.model_dir)
-                            .hint_text("path/to/model/")
-                            .desired_width(160.0),
-                    );
-                    if ui.button("…").clicked() {
-                        if let Some(p) = rfd::FileDialog::new().pick_folder() {
-                            self.model_dir = p.display().to_string();
-                        }
-                    }
-                });
-                let btn_label = if self.model_loaded() {
-                    "↺ Reload"
+                let choose_label = if self.model_loaded() {
+                    "↺ Choose model folder"
                 } else {
-                    "Load model"
+                    "Choose model folder…"
                 };
-                if ui.button(btn_label).clicked() {
-                    self.load_model();
+                if ui
+                    .add_sized(
+                        [ui.available_width(), 32.0],
+                        egui::Button::new(choose_label),
+                    )
+                    .clicked()
+                {
+                    if let Some(p) = rfd::FileDialog::new().pick_folder() {
+                        self.model_dir = p.display().to_string();
+                        self.load_model();
+                    }
                 }
                 if self.model_loaded() {
                     ui.colored_label(egui::Color32::GREEN, "● model ready");
+                } else if !self.model_dir.is_empty() {
+                    ui.add(
+                        egui::Label::new(
+                            RichText::new(format!("Selected: {}", self.model_dir))
+                                .small()
+                                .color(egui::Color32::GRAY),
+                        )
+                        .truncate(),
+                    );
                 }
 
                 ui.add_space(12.0);
