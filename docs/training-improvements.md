@@ -4,6 +4,8 @@ This document records the improvement plan for `training/train.py`, so work can
 proceed sequentially and nothing gets lost.
 
 > Status: ✅ — done, 🔜 — queued, ⏸ — deferred/under discussion.
+>
+> **All items are complete.** This plan was shipped in release **v2.0.0**.
 
 ---
 
