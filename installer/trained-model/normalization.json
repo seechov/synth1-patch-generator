@@ -1,5 +1,5 @@
 {
-  "latent_dim": 10,
+  "latent_dim": 32,
   "output_dim": 105,
   "column_names": [
     "osc2 tune",
