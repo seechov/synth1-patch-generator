@@ -1,5 +1,7 @@
 # `train.py` Walkthrough — Synth1GAN
 
+> The training code is derived from the original [jskripchuk/Synth1GAN](https://github.com/jskripchuk/Synth1GAN) project, licensed under **GPL-3.0**.
+
 > This document explains the training script section by section.  
 > It is written for readers who are comfortable with Python programming but
 > have never worked with neural network training.  

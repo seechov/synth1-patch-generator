@@ -1,3 +1,14 @@
+# Synth1GAN — Licensing
+
+This repository contains code under two different licenses. The terms
+that apply to each portion are described below.
+
+## GUI and general project code — MIT
+
+Everything not listed in the GPL-3.0 section below (notably the Rust GUI
+under `gui/`, the packaging configs under `installer/`, and the
+documentation) is licensed under the MIT License.
+
 MIT License
 
 Copyright (c) 2026 Aleksei Sychev
@@ -19,3 +30,15 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+## Training code — GPL-3.0
+
+The machine-learning training code under `training/` (including `train.py`)
+is derived from the original
+[jskripchuk/Synth1GAN](https://github.com/jskripchuk/Synth1GAN) project and
+is therefore licensed under the GNU General Public License, version 3.0
+(GPL-3.0). See `training/LICENSE` for the full license text.
+
+As GPL-3.0 is a copyleft license, any distribution or modification of the
+training code must also comply with the terms of GPL-3.0, including making
+the corresponding source code available to recipients.

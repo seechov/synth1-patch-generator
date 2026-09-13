@@ -225,7 +225,8 @@ All artifacts are uploaded to a GitHub Release via `softprops/action-gh-release`
 
 ## 6. License and authorship
 
-- **License**: MIT (see `LICENSE`, Copyright © 2026 Aleksei Sychev).
+- **GUI and project code**: MIT (see `LICENSE`, Copyright © 2026 Aleksei Sychev).
+- **Training code** (`training/`): **GPL-3.0**, derived from the original [jskripchuk/Synth1GAN](https://github.com/jskripchuk/Synth1GAN) project (see `training/LICENSE`).
 - **GUI author**: Aleksei Sychev `seechov@protonmail.com` (see `gui/Cargo.toml`).
 - **Synth1** — VST synthesizer by Daichi Laboratory (ICHIRO TODA), see <https://www.taktech.org/takumi/synth1/>.
 

@@ -34,7 +34,7 @@ Generates novel presets for the [Synth1](https://www.taktech.org/takumi/synth1/)
 
 ## What is Synth1GAN?
 
-Synth1GAN generates new, previously non-existent presets (`.sy1`) for the free **Synth1** VST synth. It is a Wasserstein GAN with Gradient Penalty (WGAN-GP) trained on the factory bank, free soundbanks, or any combination.
+Synth1GAN generates new, previously non-existent presets (`.sy1`) for the free **Synth1** VST synth. It is a Wasserstein GAN with Gradient Penalty (WGAN-GP) trained on the factory bank, free soundbanks, or any combination. The training code is based on the original [jskripchuk/Synth1GAN](https://github.com/jskripchuk/Synth1GAN) project (GPL-3.0).
 
 The whole pipeline:
 

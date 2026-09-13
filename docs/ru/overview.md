@@ -225,7 +225,8 @@ cargo build --release
 
 ## 6. Лицензия и авторство
 
-- **Лицензия**: MIT (см. `LICENSE`, Copyright © 2026 Aleksei Sychev).
+- **GUI и код проекта**: MIT (см. `LICENSE`, Copyright © 2026 Aleksei Sychev).
+- **Код обучения** (`training/`): **GPL-3.0**, производная работа от оригинального проекта [jskripchuk/Synth1GAN](https://github.com/jskripchuk/Synth1GAN) (см. `training/LICENSE`).
 - **Автор GUI**: Aleksei Sychev `seechov@protonmail.com` (см. `gui/Cargo.toml`).
 - **Synth1** — VST-синтезатор от Daichi Laboratory (ICHIRO TODA), см. <https://www.taktech.org/takumi/synth1/>.
 

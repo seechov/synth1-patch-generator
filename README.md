@@ -2,6 +2,8 @@
 
 Generates novel [Synth1](https://www.taktech.org/takumi/synth1/) VST presets using a WGAN-GP neural network trained on real soundbanks.
 
+The training code is based on the original [jskripchuk/Synth1GAN](https://github.com/jskripchuk/Synth1GAN) project, licensed under **GPL-3.0**.
+
 ---
 
 ## Project structure
@@ -147,3 +149,12 @@ Open the repository in Zed. It will detect `.devcontainer/devcontainer.json` and
 | **Discriminator** | preset(F) → Linear(256) → Linear(128) → Linear(64) → Linear(1), LeakyReLU(0.2), optional spectral norm |
 | **Training** | WGAN-GP, λ=10, 5 critic steps per generator step, Adam lr_g/lr_d=0.0002 (β₁=0.5, β₂=0.999), exponential moving average of generator weights |
 | **Features** | continuous parameters scaled to [-1, 1]; categoricals one-hot encoded (kept 0/1) |
+
+---
+
+## License
+
+This repository contains code under two licenses:
+
+- **GUI and general project code** — MIT (see `LICENSE`, © 2026 Aleksei Sychev).
+- **Training code** (`training/`) — **GPL-3.0**, derived from the original [jskripchuk/Synth1GAN](https://github.com/jskripchuk/Synth1GAN) project. Full text in `training/LICENSE`.

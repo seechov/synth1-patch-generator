@@ -1,0 +1,21 @@
+# Normalize line endings to LF in the repository, regardless of the
+# developer's OS. Prevents noisy CRLF/LF diffs like the one in the workflow.
+* text=auto
+
+# Explicitly force LF for text files that must stay LF in the repo.
+*.yml     text eol=lf
+*.yaml    text eol=lf
+*.md      text eol=lf
+*.rs      text eol=lf
+*.toml    text eol=lf
+*.lock    text eol=lf
+*.iss     text eol=lf
+*.json    text eol=lf
+*.py      text eol=lf
+
+# Binary files — never touch line endings.
+*.onnx    binary
+*.ico     binary
+*.icns    binary
+*.png     binary
+*.7z      binary
