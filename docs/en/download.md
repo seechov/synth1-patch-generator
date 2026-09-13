@@ -32,6 +32,14 @@ All installers bundle the default model (`generator.onnx` + `normalization.json`
 
 The latest release page lists every artifact, including a source bundle and machine-generated release notes.
 
+!!! warning "Windows SmartScreen"
+    The Windows installer is **not** digitally signed, so Microsoft Edge and
+    Windows may show a "Windows protected your PC" warning. This is expected for
+    unsigned open-source binaries. To install anyway:
+
+    1. Click **More info**.
+    2. Click **Run anyway**.
+
 ---
 
 ## Build from source

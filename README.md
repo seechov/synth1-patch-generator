@@ -125,6 +125,10 @@ If you trained your own model, point **Model folder** to the directory containin
 
 Load the output folder into Synth1 via **File → Load Bank**.
 
+> **Windows SmartScreen:** the installer is not digitally signed, so Windows or
+> Edge may show a "Windows protected your PC" warning. This is expected for
+> unsigned open-source binaries — click **More info**, then **Run anyway**.
+
 ---
 
 ## Development in Zed with DevContainer
