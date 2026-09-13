@@ -1,6 +1,6 @@
 # Synth1GAN — Project Overview
 
-> **This Synth1 Bank Does Not Exist** — генерация новых пресетов для VST-синтезатора [Synth1](https://www.taktech.org/takumi/synth1/) с помощью нейросети WGAN-GP.
+> **This Synth1 Bank Does Not Exist** — генерация новых пресетов для VST-синтезатора [Synth1](https://daichilab.sakura.ne.jp/softsynth/) с помощью нейросети WGAN-GP.
 
 ---
 
@@ -228,13 +228,13 @@ cargo build --release
 - **GUI и код проекта**: MIT (см. `LICENSE`, Copyright © 2026 Aleksei Sychev).
 - **Код обучения** (`training/`): **GPL-3.0**, производная работа от оригинального проекта [jskripchuk/Synth1GAN](https://github.com/jskripchuk/Synth1GAN) (см. `training/LICENSE`).
 - **Автор GUI**: Aleksei Sychev `seechov@protonmail.com` (см. `gui/Cargo.toml`).
-- **Synth1** — VST-синтезатор от Daichi Laboratory (ICHIRO TODA), см. <https://www.taktech.org/takumi/synth1/>.
+- **Synth1** — VST-синтезатор от Daichi Laboratory (ICHIRO TODA), см. <https://daichilab.sakura.ne.jp/softsynth/>.
 
 ---
 
 ## 7. Полезные ссылки
 
-- [Synth1 (официальный сайт)](https://www.taktech.org/takumi/synth1/)
+- [Synth1 (официальный сайт)](https://daichilab.sakura.ne.jp/softsynth/)
 - [tract-onnx — Rust-рантайм ONNX](https://github.com/sonos/tract)
 - [egui — библиотека GUI на Rust](https://github.com/emilk/egui)
 - [PyTorch — установка под свою платформу](https://pytorch.org/get-started/locally/)

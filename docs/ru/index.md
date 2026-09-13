@@ -1,6 +1,6 @@
 # Synth1GAN — Этот Synth1 банк не существует
 
-Генерирует новые пресеты VST-синтезатора [Synth1](https://www.taktech.org/takumi/synth1/) с помощью нейросети **WGAN-GP**, обученной на реальных банках звуков.
+Генерирует новые пресеты VST-синтезатора [Synth1](https://daichilab.sakura.ne.jp/softsynth/) с помощью нейросети **WGAN-GP**, обученной на реальных банках звуков.
 
 <div class="grid cards" markdown>
 

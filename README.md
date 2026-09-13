@@ -1,6 +1,6 @@
 # Synth1GAN — This Synth1 Bank Does Not Exist
 
-Generates novel [Synth1](https://www.taktech.org/takumi/synth1/) VST presets using a WGAN-GP neural network trained on real soundbanks.
+Generates novel [Synth1](https://daichilab.sakura.ne.jp/softsynth/) VST presets using a WGAN-GP neural network trained on real soundbanks.
 
 The training code is based on the original [jskripchuk/Synth1GAN](https://github.com/jskripchuk/Synth1GAN) project, licensed under **GPL-3.0**.
 
