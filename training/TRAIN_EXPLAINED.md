@@ -368,7 +368,7 @@ its position in the full output vector.
 | `--n-critic` | 5 | Critic updates per generator update |
 | `--lambda-gp` | 10.0 | Gradient penalty weight |
 | `--sample-interval` | 400 | Log every N batches |
-| `--batch-norm` | on | Use BatchNorm in the generator trunk |
+| `--batch-norm` | on | BatchNorm in the generator trunk (`--no-batch-norm` disables) |
 | `--ema-decay` | 0.999 | EMA decay for generator weights (`0` disables) |
 | `--spectral-norm` | off | Spectral normalization in the discriminator |
 | `--d-noise-std` | 0.0 | Std of Gaussian noise added to critic inputs |

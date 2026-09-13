@@ -728,9 +728,9 @@ def main() -> None:
     )
     parser.add_argument(
         "--batch-norm",
-        action="store_true",
+        action=argparse.BooleanOptionalAction,
         default=True,
-        help="Use BatchNorm in the generator trunk (default: on)",
+        help="Use BatchNorm in the generator trunk (--no-batch-norm disables)",
     )
     parser.add_argument(
         "--ema-decay",

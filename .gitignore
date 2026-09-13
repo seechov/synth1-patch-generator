@@ -16,6 +16,9 @@ presets/
 # Rust
 gui/target/
 
+# MkDocs build output (built by .github/workflows/pages.yml)
+site/
+
 # Generated preset outputs
 gp_batch_final_*/
 

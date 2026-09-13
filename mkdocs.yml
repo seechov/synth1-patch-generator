@@ -1,0 +1,56 @@
+docs_dir: docs
+exclude_docs: |
+  src/
+
+site_name: Synth1GAN
+site_description: Synth1GAN — This Synth1 Bank Does Not Exist. Generate new Synth1 presets with a WGAN-GP neural network.
+site_author: Aleksei Sychev
+repo_url: https://github.com/seechov/synth1-patch-generator
+repo_name: seechov/synth1-patch-generator
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.top
+    - content.tabs.link
+
+plugins:
+  - search:
+      lang:
+        - en
+        - ru
+  - i18n:
+      docs_structure: folder
+      fallback_to_default: true
+      reconfigure_material: true
+      languages:
+        - locale: en
+          name: English
+          default: true
+          build: true
+        - locale: ru
+          name: Русский
+          build: true
+
+nav:
+  - Home: index.md
+  - Overview: overview.md
+  - Training improvements: training-improvements.md
+  - Download: download.md

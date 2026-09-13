@@ -68,7 +68,7 @@ Use the Synth1 factory bank, free soundbanks, or any combination.
 | `--latent-dim` | 32 | Latent noise vector size |
 | `--lr-g` | 0.0002 | Generator learning rate |
 | `--lr-d` | 0.0002 | Discriminator learning rate |
-| `--batch-norm` | on | Use BatchNorm in the generator trunk |
+| `--batch-norm` | on | Use BatchNorm in the generator trunk (`--no-batch-norm` disables) |
 | `--ema-decay` | 0.999 | EMA decay for generator weights (`0` disables) |
 | `--spectral-norm` | off | Use spectral normalization in the discriminator |
 | `--d-noise-std` | 0.0 | Std of Gaussian noise added to discriminator inputs |
