@@ -1,4 +1,4 @@
-# Synth1GAN — Project Overview
+# Seechov Forge — Project Overview
 
 > **This Synth1 Bank Does Not Exist** — generates new presets for the [Synth1](https://daichilab.sakura.ne.jp/softsynth/) VST synthesizer using a WGAN-GP neural network.
 
@@ -6,7 +6,7 @@
 
 ## 1. About the project
 
-Synth1GAN generates new, previously non-existent presets (`.sy1`) for the free **Synth1** VST synthesizer. It is based on a Wasserstein GAN with Gradient Penalty (WGAN-GP), trained on real soundbanks.
+Seechov Forge generates new, previously non-existent presets (`.sy1`) for the free **Synth1** VST synthesizer. It is based on a Wasserstein GAN with Gradient Penalty (WGAN-GP), trained on real soundbanks.
 
 The project consists of two independent parts:
 
@@ -32,7 +32,7 @@ flowchart LR
 ## 2. Repository structure
 
 ```
-Synth1GAN/
+Seechov Forge/
 ├── training/                  # Python: preset parsing and model training
 │   ├── train.py               # All-in-one training script (the whole pipeline)
 │   ├── requirements.txt       # Python dependencies (PyTorch installed separately)
@@ -44,7 +44,7 @@ Synth1GAN/
 │   ├── Cargo.lock             # Locked dependency versions
 │   ├── src/main.rs            # All GUI logic (single file)
 │   └── assets/
-│       └── synth1gan.desktop  # .desktop file for Linux
+│       └── seechov-forge.desktop  # .desktop file for Linux
 ├── installer/                 # Packaging configs
 │   ├── windows/setup.iss      # Inno Setup script (Windows installer)
 │   ├── macos/Info.plist       # macOS .app bundle metadata
@@ -124,8 +124,8 @@ The GUI is written in Rust using:
 
 Generation process:
 
-1. On startup the app looks for a default model next to the executable (a `model/` directory next to the exe/binary, or `/usr/share/synth1gan/model` on Linux). If `generator.onnx` and `normalization.json` are found, the model loads automatically.
-2. The default output folder is `Documents/Synth1GAN/presets` (created if needed).
+1. On startup the app looks for a default model next to the executable (a `model/` directory next to the exe/binary, or `/usr/share/seechov-forge/model` on Linux). If `generator.onnx` and `normalization.json` are found, the model loads automatically.
+2. The default output folder is `Documents/Seechov Forge/presets` (created if needed).
 3. On **⚡ Generate**, for each of `N` presets:
    - a latent noise vector is generated (normal distribution);
    - the model emits a vector where continuous parameters come first, then one-hot groups (each the result of a softmax head);
@@ -183,13 +183,13 @@ cd gui
 cargo build --release
 ```
 
-Binaries: `gui\target\release\synth1gan.exe` (Windows) or `gui/target/release/synth1gan` (Linux).
+Binaries: `gui\target\release\seechov-forge.exe` (Windows) or `gui/target/release/seechov-forge` (Linux).
 
 ### 4.3 Generating presets
 
 1. Launch the app — if a model ships with the installer it loads automatically and shows a "● model ready" indicator.
 2. If needed, load a different model folder (containing `generator.onnx` + `normalization.json`) with **Load model**.
-3. Pick an output folder (defaults to `Documents/Synth1GAN/presets`).
+3. Pick an output folder (defaults to `Documents/Seechov Forge/presets`).
 4. Set a bank name and preset count (1–128).
 5. Click **⚡ Generate**.
 
@@ -218,8 +218,8 @@ All artifacts are uploaded to a GitHub Release via `softprops/action-gh-release`
 ### 5.3 Packaging
 
 - **Windows** — `installer/windows/setup.iss` (Inno Setup, EN/RU localization). The default model (`installer/trained-model/`) is packaged into a `model/` directory next to the executable.
-- **macOS** — `installer/macos/Info.plist` (identifier `com.seechov.synth1gan`). The model is placed in `Contents/MacOS/model/` inside the `.app` bundle.
-- **Linux** — `gui/assets/synth1gan.desktop` + `cargo-deb`/`cargo-generate-rpm` metadata in `Cargo.toml`. The model is packaged into `/usr/share/synth1gan/model`.
+- **macOS** — `installer/macos/Info.plist` (identifier `com.seechov.seechov-forge`). The model is placed in `Contents/MacOS/model/` inside the `.app` bundle.
+- **Linux** — `gui/assets/seechov-forge.desktop` + `cargo-deb`/`cargo-generate-rpm` metadata in `Cargo.toml`. The model is packaged into `/usr/share/seechov-forge/model`.
 
 ---
 

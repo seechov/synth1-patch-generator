@@ -2,8 +2,8 @@
 fn main() {
     // Embed the icon (and version info) into the Windows executable.
     let mut res = winres::WindowsResource::new();
-    res.set_icon("assets/synth1gan.ico");
-    res.set("ProductName", "Synth1GAN");
+    res.set_icon("assets/seechov-forge.ico");
+    res.set("ProductName", "Seechov Forge");
     res.set(
         "FileDescription",
         "Synth1 VST preset generator powered by a WGAN-GP",

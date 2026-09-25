@@ -1,4 +1,4 @@
-//! Synth1GAN GUI — generates Synth1 VST presets using a trained WGAN-GP model.
+//! Seechov Forge GUI — generates Synth1 VST presets using a trained WGAN-GP model.
 //!
 //! Workflow:
 //!   1. Point the app at a folder that contains generator.onnx + normalization.json
@@ -183,7 +183,7 @@ impl App {
             model_dir,
             output_dir: App::default_output_dir().unwrap_or_default(),
             num_presets: 16,
-            bank_name: "SynthGAN".to_string(),
+            bank_name: "Seechov Forge".to_string(),
             log: Vec::new(),
             model: None,
             norm_params: None,
@@ -202,10 +202,10 @@ impl App {
         self.log.push(msg.into());
     }
 
-    /// Return a sensible default output folder (the user's Documents/Synth1GAN).
+    /// Return a sensible default output folder (the user's Documents/Seechov Forge).
     fn default_output_dir() -> Option<String> {
         if let Some(docs) = dirs_document_dir() {
-            let dir = docs.join("Synth1GAN").join("presets");
+            let dir = docs.join("Seechov Forge").join("presets");
             return Some(dir.display().to_string());
         }
         None
@@ -216,7 +216,7 @@ impl App {
     /// Search order:
     ///   1. `<exe_dir>/model`   (Windows installer layout)
     ///   2. `<exe_dir>`         (dev convenience — files sit next to the binary)
-    ///   3. `/usr/share/synth1gan/model` (Linux deb/rpm layout)
+    ///   3. `/usr/share/seechov-forge/model` (Linux deb/rpm layout)
     fn find_default_model_dir() -> Option<PathBuf> {
         let mut candidates: Vec<PathBuf> = Vec::new();
         if let Some(exe_dir) = current_exe_dir() {
@@ -224,7 +224,7 @@ impl App {
             candidates.push(exe_dir);
         }
         #[cfg(not(target_os = "windows"))]
-        candidates.push(PathBuf::from("/usr/share/synth1gan/model"));
+        candidates.push(PathBuf::from("/usr/share/seechov-forge/model"));
 
         for candidate in candidates {
             if candidate.join("generator.onnx").exists()
@@ -379,7 +379,7 @@ impl eframe::App for App {
             .min_width(260.0)
             .show(ctx, |ui| {
                 ui.add_space(8.0);
-                ui.heading("Synth1GAN");
+                ui.heading("Seechov Forge");
                 ui.add_space(4.0);
                 ui.separator();
 
@@ -529,13 +529,13 @@ fn dirs_document_dir() -> Option<PathBuf> {
 fn main() -> eframe::Result<()> {
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
-            .with_title("Synth1GAN — Preset Generator")
+            .with_title("Seechov Forge — Preset Generator")
             .with_inner_size([800.0, 480.0])
             .with_min_inner_size([600.0, 360.0]),
         ..Default::default()
     };
     eframe::run_native(
-        "Synth1GAN",
+        "Seechov Forge",
         options,
         Box::new(|cc| Ok(Box::new(App::new(cc)))),
     )

@@ -4,13 +4,13 @@
 <plist version="1.0">
 <dict>
     <key>CFBundleExecutable</key>
-    <string>synth1gan</string>
+    <string>seechov-forge</string>
     <key>CFBundleIdentifier</key>
-    <string>com.seechov.synth1gan</string>
+    <string>com.seechov.seechov-forge</string>
     <key>CFBundleName</key>
-    <string>Synth1GAN</string>
+    <string>Seechov Forge</string>
     <key>CFBundleDisplayName</key>
-    <string>Synth1GAN</string>
+    <string>Seechov Forge</string>
     <key>CFBundleVersion</key>
     <string>2.0.0</string>
     <key>CFBundleShortVersionString</key>
@@ -18,7 +18,7 @@
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleIconFile</key>
-    <string>synth1gan.icns</string>
+    <string>seechov-forge.icns</string>
     <key>NSHighResolutionCapable</key>
     <true/>
     <key>LSMinimumSystemVersion</key>

@@ -1,8 +1,8 @@
 [Desktop Entry]
-Name=Synth1GAN
+Name=Seechov Forge
 Comment=Synth1 VST preset generator powered by a WGAN-GP neural network
-Exec=synth1gan
-Icon=synth1gan
+Exec=seechov-forge
+Icon=seechov-forge
 Type=Application
 Categories=Audio;Music;
 Terminal=false

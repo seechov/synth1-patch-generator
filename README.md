@@ -1,4 +1,4 @@
-# Synth1GAN — This Synth1 Bank Does Not Exist
+# Seechov Forge — This Synth1 Bank Does Not Exist
 
 Generates novel [Synth1](https://daichilab.sakura.ne.jp/softsynth/) VST presets using a WGAN-GP neural network trained on real soundbanks.
 
@@ -9,7 +9,7 @@ The training code is based on the original [jskripchuk/Synth1GAN](https://github
 ## Project structure
 
 ```
-Synth1GAN/
+Seechov Forge/
 ├── training/          # Python: parse presets and train the model
 │   ├── train.py       # All-in-one training script
 │   └── requirements.txt
@@ -103,8 +103,8 @@ cargo build --release
 ```
 
 Binary output:
-- Windows: `gui\target\release\synth1gan.exe`
-- Linux:   `gui/target/release/synth1gan`
+- Windows: `gui\target\release\seechov-forge.exe`
+- Linux:   `gui/target/release/seechov-forge`
 
 Or just run directly:
 
@@ -116,10 +116,10 @@ cargo run --release
 
 ## Step 3 — Generate presets
 
-The installers bundle a default model (`installer/trained-model/`), so on first launch the GUI auto-discovers it next to the executable and loads it right away. The default output folder is `Documents/Synth1GAN/presets`.
+The installers bundle a default model (`installer/trained-model/`), so on first launch the GUI auto-discovers it next to the executable and loads it right away. The default output folder is `Documents/Seechov Forge/presets`.
 
 1. Launch the app — you should see a green "● model ready" indicator (bundled model auto-loaded)
-2. Pick a **Output folder** (defaults to `Documents/Synth1GAN/presets`)
+2. Pick a **Output folder** (defaults to `Documents/Seechov Forge/presets`)
 3. Set a bank name and preset count (1–128)
 4. Click **⚡ Generate**
 

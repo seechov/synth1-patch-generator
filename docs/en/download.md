@@ -14,7 +14,7 @@
 
     ---
 
-    `Synth1GAN.app` in a `.dmg`. The model ships inside `Contents/MacOS/model/`.
+    `Seechov Forge.app` in a `.dmg`. The model ships inside `Contents/MacOS/model/`.
 
     [:material-download: Download macOS DMG](https://github.com/seechov/synth1-patch-generator/releases/latest){ .md-button }
 
@@ -22,7 +22,7 @@
 
     ---
 
-    `cargo-deb` and `cargo-generate-rpm` packages. The model is installed to `/usr/share/synth1gan/model`.
+    `cargo-deb` and `cargo-generate-rpm` packages. The model is installed to `/usr/share/seechov-forge/model`.
 
     [:material-download: Download .deb / .rpm](https://github.com/seechov/synth1-patch-generator/releases/latest){ .md-button }
 
@@ -51,7 +51,7 @@ cd gui
 cargo build --release
 ```
 
-- Windows: `gui\target\release\synth1gan.exe`
-- Linux:   `gui/target/release/synth1gan`
+- Windows: `gui\target\release\seechov-forge.exe`
+- Linux:   `gui/target/release/seechov-forge`
 
 See [Building the GUI](overview.md#42-building-the-gui) for details.

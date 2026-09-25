@@ -1,5 +1,5 @@
 {
-  "name": "Synth1GAN",
+  "name": "Seechov Forge",
   "build": {
     "dockerfile": "Dockerfile",
     "context": "..",

@@ -1,4 +1,4 @@
-# `train.py` Walkthrough — Synth1GAN
+# `train.py` Walkthrough — Seechov Forge
 
 > The training code is derived from the original [jskripchuk/Synth1GAN](https://github.com/jskripchuk/Synth1GAN) project, licensed under **GPL-3.0**.
 

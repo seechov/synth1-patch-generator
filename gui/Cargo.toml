@@ -1,5 +1,5 @@
 [package]
-name = "synth1gan"
+name = "seechov-forge"
 version = "2.0.0"
 edition = "2021"
 authors = ["Aleksei Sychev <seechov@protonmail.com>"]
@@ -7,7 +7,7 @@ description = "Synth1 VST preset generator powered by a WGAN-GP neural network"
 license = "MIT"
 
 [[bin]]
-name = "synth1gan"
+name = "seechov-forge"
 path = "src/main.rs"
 
 [dependencies]
@@ -41,18 +41,18 @@ section = "sound"
 priority = "optional"
 depends = "$auto"
 assets = [
-  ["target/release/synth1gan", "usr/bin/synth1gan", "755"],
-  ["assets/synth1gan.desktop", "usr/share/applications/synth1gan.desktop", "644"],
-  ["assets/synth1gan.png", "usr/share/icons/hicolor/256x256/apps/synth1gan.png", "644"],
-  ["../installer/trained-model/generator.onnx", "usr/share/synth1gan/model/generator.onnx", "644"],
-  ["../installer/trained-model/normalization.json", "usr/share/synth1gan/model/normalization.json", "644"],
+  ["target/release/seechov-forge", "usr/bin/seechov-forge", "755"],
+  ["assets/seechov-forge.desktop", "usr/share/applications/seechov-forge.desktop", "644"],
+  ["assets/seechov-forge.png", "usr/share/icons/hicolor/256x256/apps/seechov-forge.png", "644"],
+  ["../installer/trained-model/generator.onnx", "usr/share/seechov-forge/model/generator.onnx", "644"],
+  ["../installer/trained-model/normalization.json", "usr/share/seechov-forge/model/normalization.json", "644"],
 ]
 
 [package.metadata.generate-rpm]
 assets = [
-  { source = "target/release/synth1gan", dest = "/usr/bin/synth1gan", mode = "755" },
-  { source = "assets/synth1gan.desktop", dest = "/usr/share/applications/synth1gan.desktop", mode = "644" },
-  { source = "assets/synth1gan.png", dest = "/usr/share/icons/hicolor/256x256/apps/synth1gan.png", mode = "644" },
-  { source = "../installer/trained-model/generator.onnx", dest = "/usr/share/synth1gan/model/generator.onnx", mode = "644" },
-  { source = "../installer/trained-model/normalization.json", dest = "/usr/share/synth1gan/model/normalization.json", mode = "644" },
+  { source = "target/release/seechov-forge", dest = "/usr/bin/seechov-forge", mode = "755" },
+  { source = "assets/seechov-forge.desktop", dest = "/usr/share/applications/seechov-forge.desktop", mode = "644" },
+  { source = "assets/seechov-forge.png", dest = "/usr/share/icons/hicolor/256x256/apps/seechov-forge.png", mode = "644" },
+  { source = "../installer/trained-model/generator.onnx", dest = "/usr/share/seechov-forge/model/generator.onnx", mode = "644" },
+  { source = "../installer/trained-model/normalization.json", dest = "/usr/share/seechov-forge/model/normalization.json", mode = "644" },
 ]

@@ -1,4 +1,4 @@
-# Разбор скрипта `train.py` — Synth1GAN
+# Разбор скрипта `train.py` — Seechov Forge
 
 > Код обучения основан на оригинальном проекте [jskripchuk/Synth1GAN](https://github.com/jskripchuk/Synth1GAN) под лицензией **GPL-3.0**.
 

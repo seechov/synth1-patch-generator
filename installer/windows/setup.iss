@@ -2,9 +2,9 @@
   #define MyAppVersion "1"
 #endif
 
-#define MyAppName      "Synth1GAN"
+#define MyAppName      "Seechov Forge"
 #define MyAppPublisher "Aleksei Sychev"
-#define MyAppExeName   "synth1gan.exe"
+#define MyAppExeName   "seechov-forge.exe"
 #define MyAppRoot      "..\.."
 
 [Setup]
@@ -15,7 +15,7 @@ AppPublisher={#MyAppPublisher}
 DefaultDirName={autopf}\{#MyAppName}
 DefaultGroupName={#MyAppName}
 OutputDir={#MyAppRoot}\dist
-OutputBaseFilename=synth1gan-setup-{#MyAppVersion}-windows-x64
+OutputBaseFilename=seechov-forge-setup-{#MyAppVersion}-windows-x64
 Compression=lzma2/ultra64
 SolidCompression=yes
 ArchitecturesInstallIn64BitMode=x64compatible

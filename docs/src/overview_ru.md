@@ -1,4 +1,4 @@
-# Synth1GAN — Project Overview
+# Seechov Forge — Project Overview
 
 > **This Synth1 Bank Does Not Exist** — генерация новых пресетов для VST-синтезатора [Synth1](https://daichilab.sakura.ne.jp/softsynth/) с помощью нейросети WGAN-GP.
 
@@ -6,7 +6,7 @@
 
 ## 1. О проекте
 
-Synth1GAN генерирует новые, ранее не существовавшие пресеты (`.sy1`) для бесплатного VST-синтезатора **Synth1**. В основе лежит генеративно-состязательная сеть с градиентным штрафом (Wasserstein GAN with Gradient Penalty, WGAN-GP), обученная на реальных банках звуков.
+Seechov Forge генерирует новые, ранее не существовавшие пресеты (`.sy1`) для бесплатного VST-синтезатора **Synth1**. В основе лежит генеративно-состязательная сеть с градиентным штрафом (Wasserstein GAN with Gradient Penalty, WGAN-GP), обученная на реальных банках звуков.
 
 Проект состоит из двух независимых частей:
 
@@ -32,7 +32,7 @@ flowchart LR
 ## 2. Структура репозитория
 
 ```
-Synth1GAN/
+Seechov Forge/
 ├── training/                  # Python: парсинг пресетов и обучение модели
 │   ├── train.py               # Единый скрипт обучения (весь пайплайн)
 │   ├── requirements.txt       # Python-зависимости (PyTorch ставится отдельно)
@@ -44,7 +44,7 @@ Synth1GAN/
 │   ├── Cargo.lock             # Зафиксированные версии зависимостей
 │   ├── src/main.rs            # Вся логика GUI (один файл)
 │   └── assets/
-│       └── synth1gan.desktop  # .desktop-файл для Linux
+│       └── seechov-forge.desktop  # .desktop-файл для Linux
 ├── installer/                 # Конфигурации упаковки
 │   ├── windows/setup.iss      # Сценарий Inno Setup (Windows-инсталлятор)
 │   ├── macos/Info.plist       # Метаданные macOS .app-бандла
@@ -124,8 +124,8 @@ GUI написано на Rust с использованием:
 
 Процесс генерации:
 
-1. При запуске приложение ищет модель по умолчанию рядом с исполняемым файлом (каталог `model/` рядом с exe/бинарником, либо `/usr/share/synth1gan/model` на Linux). Если найдены `generator.onnx` и `normalization.json`, модель загружается автоматически.
-2. Выходной каталог по умолчанию — `Documents/Synth1GAN/presets` (создаётся при необходимости).
+1. При запуске приложение ищет модель по умолчанию рядом с исполняемым файлом (каталог `model/` рядом с exe/бинарником, либо `/usr/share/seechov-forge/model` на Linux). Если найдены `generator.onnx` и `normalization.json`, модель загружается автоматически.
+2. Выходной каталог по умолчанию — `Documents/Seechov Forge/presets` (создаётся при необходимости).
 3. При нажатии **⚡ Generate** для каждого из `N` пресетов:
    - генерируется латентный вектор шума (нормальное распределение);
    - модель выдаёт вектор, где непрерывные параметры идут первыми, а затем one-hot группы (каждая — результат softmax-головы);
@@ -183,13 +183,13 @@ cd gui
 cargo build --release
 ```
 
-Бинарники: `gui\target\release\synth1gan.exe` (Windows) или `gui/target/release/synth1gan` (Linux).
+Бинарники: `gui\target\release\seechov-forge.exe` (Windows) или `gui/target/release/seechov-forge` (Linux).
 
 ### 4.3 Генерация пресетов
 
 1. Запустить приложение — если модель поставляется вместе с инсталлятором, она загрузится автоматически и появится индикатор «● model ready».
 2. При необходимости выбрать/загрузить другую папку модели (с `generator.onnx` + `normalization.json`) кнопкой **Load model**.
-3. Выбрать выходную папку (по умолчанию `Documents/Synth1GAN/presets`).
+3. Выбрать выходную папку (по умолчанию `Documents/Seechov Forge/presets`).
 4. Задать имя банка и количество пресетов (1–128).
 5. Нажать **⚡ Generate**.
 
@@ -218,8 +218,8 @@ cargo build --release
 ### 5.3 Упаковка
 
 - **Windows** — `installer/windows/setup.iss` (Inno Setup, локализация EN/RU). Модель по умолчанию (`installer/trained-model/`) упаковывается в каталог `model/` рядом с исполняемым файлом.
-- **macOS** — `installer/macos/Info.plist` (идентификатор `com.seechov.synth1gan`). Модель помещается в `Contents/MacOS/model/` внутри `.app`-бандла.
-- **Linux** — `gui/assets/synth1gan.desktop` + метаданные `cargo-deb`/`cargo-generate-rpm` в `Cargo.toml`. Модель упаковывается в `/usr/share/synth1gan/model`.
+- **macOS** — `installer/macos/Info.plist` (идентификатор `com.seechov.seechov-forge`). Модель помещается в `Contents/MacOS/model/` внутри `.app`-бандла.
+- **Linux** — `gui/assets/seechov-forge.desktop` + метаданные `cargo-deb`/`cargo-generate-rpm` в `Cargo.toml`. Модель упаковывается в `/usr/share/seechov-forge/model`.
 
 ---
 

@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""Render the Synth1GAN app icon.
+"""Render the Seechov Forge app icon.
 
 Draws a simple, flat icon: a rounded dark square with a synth-style waveform
 (GAN-inspired) and a subtle glow. Outputs:
 
-  gui/assets/synth1gan.ico   (Windows executable icon, multi-size)
-  gui/assets/synth1gan.png   (Linux .desktop icon, 256x256)
-  gui/assets/synth1gan.icns  (macOS bundle icon)
+  gui/assets/seechov-forge.ico   (Windows executable icon, multi-size)
+  gui/assets/seechov-forge.png   (Linux .desktop icon, 256x256)
+  gui/assets/seechov-forge.icns  (macOS bundle icon)
 
 Usage: python3 gui/tools/gen_icon.py
 """
@@ -21,7 +21,7 @@ OUT_DIR = Path(__file__).resolve().parent.parent / "assets"
 # Palette
 BG_TOP = (18, 22, 36)
 BG_BOTTOM = (8, 10, 18)
-WAVE = (94, 220, 190)      # teal
+WAVE = (94, 220, 190)  # teal
 WAVE_HI = (150, 245, 220)
 GLOW = (60, 160, 150)
 
@@ -40,9 +40,13 @@ def draw(size: int = 512) -> Image.Image:
     gd = ImageDraw.Draw(grad)
     for y in range(size):
         t = y / size
-        gd.line([(0, y), (size, y)], fill=tuple(
-            int(BG_TOP[i] + (BG_BOTTOM[i] - BG_TOP[i]) * t) for i in range(3)
-        ) + (255,))
+        gd.line(
+            [(0, y), (size, y)],
+            fill=tuple(
+                int(BG_TOP[i] + (BG_BOTTOM[i] - BG_TOP[i]) * t) for i in range(3)
+            )
+            + (255,),
+        )
     img.paste(grad, (0, 0), mask)
 
     # Glow layer under the waveform.
@@ -77,6 +81,7 @@ def draw(size: int = 512) -> Image.Image:
 def _wave(ph: float) -> float:
     """A pseudo-random but smooth waveform reminiscent of a GAN latent curve."""
     import math
+
     return (
         0.55 * math.sin(ph)
         + 0.30 * math.sin(2.0 * ph + 0.7)
@@ -87,6 +92,7 @@ def _wave(ph: float) -> float:
 def _png_bytes(img: Image.Image) -> bytes:
     """Serialize an RGBA image to in-memory PNG bytes."""
     import io
+
     buf = io.BytesIO()
     img.save(buf, format="PNG")
     return buf.getvalue()
@@ -118,21 +124,26 @@ def main():
     base = draw(512)
 
     # Windows .ico with a range of sizes.
-    ico_path = OUT_DIR / "synth1gan.ico"
+    ico_path = OUT_DIR / "seechov-forge.ico"
     base.save(
         ico_path,
         sizes=[
-            (16, 16), (24, 24), (32, 32), (48, 48),
-            (64, 64), (128, 128), (256, 256),
+            (16, 16),
+            (24, 24),
+            (32, 32),
+            (48, 48),
+            (64, 64),
+            (128, 128),
+            (256, 256),
         ],
     )
 
     # 256x256 PNG for Linux .desktop and general use.
-    png_path = OUT_DIR / "synth1gan.png"
+    png_path = OUT_DIR / "seechov-forge.png"
     base.resize((256, 256), Image.Resampling.LANCZOS).save(png_path)
 
     # macOS bundle icon.
-    icns_path = OUT_DIR / "synth1gan.icns"
+    icns_path = OUT_DIR / "seechov-forge.icns"
     icns_path.write_bytes(make_icns(base))
 
     print(f"wrote {ico_path}")

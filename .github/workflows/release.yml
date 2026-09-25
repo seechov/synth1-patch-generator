@@ -127,9 +127,9 @@ jobs:
 
       - name: Create .app bundle
         run: |
-          APP="dist/Synth1GAN.app"
+          APP="dist/Seechov Forge.app"
           mkdir -p "$APP/Contents/MacOS/model" "$APP/Contents/Resources"
-          cp gui/target/release/synth1gan "$APP/Contents/MacOS/synth1gan"
+          cp gui/target/release/seechov-forge "$APP/Contents/MacOS/seechov-forge"
           cp installer/macos/Info.plist "$APP/Contents/Info.plist"
           cp installer/trained-model/generator.onnx "$APP/Contents/MacOS/model/generator.onnx"
           cp installer/trained-model/normalization.json "$APP/Contents/MacOS/model/normalization.json"
@@ -137,18 +137,18 @@ jobs:
       - name: Create DMG
         run: |
           mkdir -p dist/dmg_src
-          cp -r dist/Synth1GAN.app dist/dmg_src/
+          cp -r dist/Seechov Forge.app dist/dmg_src/
           ln -sf /Applications dist/dmg_src/Applications
           hdiutil create \
-            -volname "Synth1GAN" \
+            -volname "Seechov Forge" \
             -srcfolder dist/dmg_src \
             -ov -format UDZO \
-            "dist/synth1gan-${{ steps.version.outputs.VERSION }}-macos.dmg"
+            "dist/seechov-forge-${{ steps.version.outputs.VERSION }}-macos.dmg"
 
       - uses: actions/upload-artifact@v4
         with:
           name: macos-dmg
-          path: dist/synth1gan-*.dmg
+          path: dist/seechov-forge-*.dmg
 
   release:
     name: GitHub Release

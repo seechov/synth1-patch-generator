@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Synth1GAN — WGAN-GP trainer for Synth1 VST presets.
+Seechov Forge — WGAN-GP trainer for Synth1 VST presets.
 
 Usage:
     python train.py --presets-dir C:/path/to/presets --output-dir ./model
@@ -699,7 +699,7 @@ def save_normalization(
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Train Synth1GAN and export ONNX model",
+        description="Train Seechov Forge and export ONNX model",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     parser.add_argument(
@@ -759,7 +759,7 @@ def main() -> None:
         np.random.seed(args.seed)
         torch.manual_seed(args.seed)
 
-    print("\n=== Synth1GAN Training ===\n")
+    print("\n=== Seechov Forge Training ===\n")
 
     # 1. Load
     print("Step 1/5 — Loading presets")

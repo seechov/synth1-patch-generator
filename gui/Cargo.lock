@@ -2932,6 +2932,22 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "94143f37725109f92c262ed2cf5e59bce7498c01bcc1502d7b9afe439a4e9f49"
 
 [[package]]
+name = "seechov-forge"
+version = "2.0.0"
+dependencies = [
+ "eframe",
+ "egui",
+ "rand",
+ "rand_distr",
+ "rfd",
+ "serde",
+ "serde_json",
+ "tract-onnx",
+ "winres",
+ "zip",
+]
+
+[[package]]
 name = "semver"
 version = "1.0.28"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3210,22 +3226,6 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 2.0.117",
-]
-
-[[package]]
-name = "synth1gan"
-version = "2.0.0"
-dependencies = [
- "eframe",
- "egui",
- "rand",
- "rand_distr",
- "rfd",
- "serde",
- "serde_json",
- "tract-onnx",
- "winres",
- "zip",
 ]
 
 [[package]]

@@ -1,4 +1,4 @@
-# Synth1GAN — This Synth1 Bank Does Not Exist
+# Seechov Forge — This Synth1 Bank Does Not Exist
 
 Генерирует новые пресеты VST-синтезатора [Synth1](https://daichilab.sakura.ne.jp/softsynth/) с помощью нейросети WGAN-GP, обученной на реальных банках звуков.
 
@@ -9,7 +9,7 @@
 ## Структура проекта
 
 ```
-Synth1GAN/
+Seechov Forge/
 ├── training/          # Python: парсинг пресетов и обучение модели
 │   ├── train.py       # Единый скрипт обучения
 │   └── requirements.txt
@@ -103,8 +103,8 @@ cargo build --release
 ```
 
 Готовые бинарники:
-- Windows: `gui\target\release\synth1gan.exe`
-- Linux:   `gui/target/release/synth1gan`
+- Windows: `gui\target\release\seechov-forge.exe`
+- Linux:   `gui/target/release/seechov-forge`
 
 Либо просто запустите напрямую:
 
@@ -116,10 +116,10 @@ cargo run --release
 
 ## Шаг 3 — Генерация пресетов
 
-Инсталляторы включают модель по умолчанию (`installer/trained-model/`), поэтому при первом запуске GUI автоматически находит её рядом с исполняемым файлом и сразу загружает. Папка вывода по умолчанию — `Documents/Synth1GAN/presets`.
+Инсталляторы включают модель по умолчанию (`installer/trained-model/`), поэтому при первом запуске GUI автоматически находит её рядом с исполняемым файлом и сразу загружает. Папка вывода по умолчанию — `Documents/Seechov Forge/presets`.
 
 1. Запустите приложение — вы увидите зелёный индикатор «● model ready» (поставляемая модель загружена автоматически)
-2. Выберите **Output folder** (по умолчанию `Documents/Synth1GAN/presets`)
+2. Выберите **Output folder** (по умолчанию `Documents/Seechov Forge/presets`)
 3. Задайте имя банка и количество пресетов (1–128)
 4. Нажмите **⚡ Generate**
 
