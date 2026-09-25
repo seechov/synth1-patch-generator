@@ -137,7 +137,7 @@ jobs:
       - name: Create DMG
         run: |
           mkdir -p dist/dmg_src
-          cp -r dist/Seechov Forge.app dist/dmg_src/
+          cp -r "dist/Seechov Forge.app" dist/dmg_src/
           ln -sf /Applications dist/dmg_src/Applications
           hdiutil create \
             -volname "Seechov Forge" \
